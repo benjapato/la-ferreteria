@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Cuenta corriente | La Ferretería</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 40px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #222;
+        }
+
+        .contenedor {
+            max-width: 1400px;
+            margin: auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+
+        h2 {
+            margin-top: 35px;
+        }
+
+        .datos {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .dato {
+            padding: 16px;
+            background-color: #f5f5f5;
+            border-radius: 6px;
+        }
+
+        .dato strong {
+            display: block;
+            margin-bottom: 7px;
+            color: #555;
+        }
+
+        .saldo {
+            margin-top: 25px;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .saldo-deuda {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .saldo-cero {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .saldo-favor {
+            background-color: #dbeafe;
+            color: #1e3a8a;
+        }
+
+        .saldo-titulo {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .saldo-valor {
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .mensaje,
+        .error {
+            margin-top: 20px;
+            padding: 13px;
+            border-radius: 5px;
+        }
+
+        .mensaje {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .aviso-anulacion {
+            margin-top: 20px;
+            padding: 12px 14px;
+            border-left: 4px solid #d97706;
+            border-radius: 5px;
+            background-color: #fff7ed;
+            color: #9a3412;
+            font-size: 14px;
+        }
+
+        .acciones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .boton {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            padding: 0 17px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .pagar {
+            background-color: #166534;
+            color: white;
+        }
+
+        .editar {
+            background-color: #dbeafe;
+            color: #1e3a8a;
+        }
+
+        .volver {
+            background-color: #ddd;
+            color: #333;
+        }
+
+        .tabla-contenedor {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            min-width: 1250px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+        }
+
+        tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .fila-pago-anulado {
+            background-color: #fafafa;
+            color: #777;
+        }
+
+        .movimiento-venta {
+            color: #b91c1c;
+            font-weight: bold;
+        }
+
+        .movimiento-pago {
+            color: #15803d;
+            font-weight: bold;
+        }
+
+        .movimiento-cancelacion {
+            color: #1d4ed8;
+            font-weight: bold;
+        }
+
+        .movimiento-anulacion-pago {
+            color: #c2410c;
+            font-weight: bold;
+        }
+
+        .pago-anulado {
+            color: #6b7280;
+            font-weight: bold;
+            text-decoration: line-through;
+        }
+
+        .importe-debe {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .importe-haber {
+            color: #15803d;
+            font-weight: bold;
+        }
+
+        .saldo-tabla-deuda {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .saldo-tabla-favor {
+            color: #1d4ed8;
+            font-weight: bold;
+        }
+
+        .saldo-tabla-cero {
+            color: #15803d;
+            font-weight: bold;
+        }
+
+        .ver {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 32px;
+            padding: 0 10px;
+            border-radius: 5px;
+            background-color: #dbeafe;
+            color: #1e3a8a;
+            text-decoration: none;
+        }
+
+        .referencia-pago {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .estado-pago {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .estado-vigente {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .estado-anulado {
+            background-color: #e5e7eb;
+            color: #4b5563;
+        }
+
+        .columna-accion {
+            width: 115px;
+            text-align: center;
+        }
+
+        .form-anulacion {
+            margin: 0;
+        }
+
+        .boton-anular-pago {
+            padding: 7px 11px;
+            border: none;
+            border-radius: 5px;
+            background-color: #f3c5c5;
+            color: #8b0000;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .boton-anular-pago:hover {
+            background-color: #e8aaaa;
+        }
+
+        .accion-anulada {
+            color: #6b7280;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .sin-datos {
+            padding: 30px;
+            text-align: center;
+            color: #666;
+        }
+
+        @media (max-width: 750px) {
+            body {
+                padding: 15px;
+            }
+
+            .contenedor {
+                padding: 20px;
+            }
+
+            .datos {
+                grid-template-columns: 1fr;
+            }
+
+            .boton {
+                flex: 1 1 auto;
+            }
+        }
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <h1 th:text="${cliente.nombre}">
+        Cliente
+    </h1>
+
+    <p>
+        Cuenta corriente, ventas y pagos realizados.
+    </p>
+
+    <div th:if="${mensaje}"
+         class="mensaje"
+         th:text="${mensaje}">
+    </div>
+
+    <div th:if="${error}"
+         class="error"
+         th:text="${error}">
+    </div>
+
+    <div class="datos">
+
+        <div class="dato">
+            <strong>Documento</strong>
+
+            <span th:text="${#strings.isEmpty(cliente.documento)
+                            ? '-'
+                            : cliente.documento}">
+            </span>
+        </div>
+
+        <div class="dato">
+            <strong>Teléfono</strong>
+
+            <span th:text="${#strings.isEmpty(cliente.telefono)
+                            ? '-'
+                            : cliente.telefono}">
+            </span>
+        </div>
+
+        <div class="dato">
+            <strong>Correo electrónico</strong>
+
+            <span th:text="${#strings.isEmpty(cliente.email)
+                            ? '-'
+                            : cliente.email}">
+            </span>
+        </div>
+
+    </div>
+
+    <!-- Cliente con deuda -->
+
+    <div th:if="${cliente.saldoCuentaCorriente.compareTo(
+                          T(java.math.BigDecimal).ZERO
+                      ) > 0}"
+         class="saldo saldo-deuda">
+
+        <span class="saldo-titulo">
+            El cliente debe
+        </span>
+
+        <span class="saldo-valor">
+            $
+            <span th:text="${cliente.saldoCuentaCorriente
+                    .stripTrailingZeros()
+                    .toPlainString()}">
+            </span>
+        </span>
+
+    </div>
+
+    <!-- Cuenta al día -->
+
+    <div th:if="${cliente.saldoCuentaCorriente.compareTo(
+                          T(java.math.BigDecimal).ZERO
+                      ) == 0}"
+         class="saldo saldo-cero">
+
+        <span class="saldo-titulo">
+            Cuenta corriente
+        </span>
+
+        <span class="saldo-valor">
+            Cuenta al día
+        </span>
+
+    </div>
+
+    <!-- Cliente con dinero a favor -->
+
+    <div th:if="${cliente.saldoCuentaCorriente.compareTo(
+                          T(java.math.BigDecimal).ZERO
+                      ) < 0}"
+         class="saldo saldo-favor">
+
+        <span class="saldo-titulo">
+            El cliente tiene dinero a favor
+        </span>
+
+        <span class="saldo-valor">
+            $
+            <span th:text="${cliente.saldoCuentaCorriente
+                    .abs()
+                    .stripTrailingZeros()
+                    .toPlainString()}">
+            </span>
+        </span>
+
+    </div>
+
+    <div class="acciones">
+        <a class="boton volver"
+           th:href="@{/}">
+            Inicio
+        </a>
+
+        <a class="boton pagar"
+           th:href="@{/clientes/{id}/pago(id=${cliente.id})}">
+            Registrar pago
+        </a>
+
+        <a class="boton editar"
+           th:href="@{/clientes/editar/{id}(id=${cliente.id})}">
+            Editar cliente
+        </a>
+
+        <a class="boton volver"
+           th:href="@{/clientes}">
+            Volver a clientes
+        </a>
+
+    </div>
+
+    <div class="aviso-anulacion">
+        Los pagos solamente pueden anularse mientras la caja donde fueron
+        registrados continúe abierta. La anulación resta el dinero de caja
+        y vuelve a sumar el importe al saldo del cliente.
+    </div>
+
+    <h2>Movimientos de cuenta corriente</h2>
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Movimiento</th>
+                <th>Descripción</th>
+                <th>Importe</th>
+                <th>Saldo anterior</th>
+                <th>Saldo posterior</th>
+                <th>Referencia</th>
+                <th class="columna-accion">Acción</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="movimiento : ${movimientos}"
+                th:classappend="${movimiento.tipo.name() == 'PAGO_CLIENTE'
+                    and movimiento.pagoCliente != null
+                    and T(java.lang.Boolean).TRUE.equals(
+                        movimiento.pagoCliente.anulado
+                    )
+                    ? 'fila-pago-anulado'
+                    : ''}">
+
+                <td th:text="${#temporals.format(
+                        movimiento.fecha,
+                        'dd/MM/yyyy HH:mm'
+                    )}">
+                </td>
+
+                <td>
+
+                    <span th:if="${movimiento.tipo.name()
+                                      == 'VENTA_CUENTA_CORRIENTE'}"
+                          class="movimiento-venta">
+                        Venta a cuenta corriente
+                    </span>
+
+                    <span th:if="${movimiento.tipo.name()
+                                      == 'PAGO_CLIENTE'
+                                  and (movimiento.pagoCliente == null
+                                  or !T(java.lang.Boolean).TRUE.equals(
+                                      movimiento.pagoCliente.anulado
+                                  ))}"
+                          class="movimiento-pago">
+                        Pago del cliente
+                    </span>
+
+                    <span th:if="${movimiento.tipo.name()
+                                      == 'PAGO_CLIENTE'
+                                  and movimiento.pagoCliente != null
+                                  and T(java.lang.Boolean).TRUE.equals(
+                                      movimiento.pagoCliente.anulado
+                                  )}"
+                          class="pago-anulado">
+                        Pago anulado
+                    </span>
+
+                    <span th:if="${movimiento.tipo.name()
+                                      == 'CANCELACION_VENTA'}"
+                          class="movimiento-cancelacion">
+                        Cancelación de venta
+                    </span>
+
+                    <span th:if="${movimiento.tipo.name()
+                                      == 'ANULACION_PAGO_CLIENTE'}"
+                          class="movimiento-anulacion-pago">
+                        Anulación de pago
+                    </span>
+
+                </td>
+
+                <td th:text="${#strings.isEmpty(movimiento.descripcion)
+                              ? '-'
+                              : movimiento.descripcion}">
+                </td>
+
+                <td>
+
+                    <span th:if="${movimiento.tipo.name()
+                                      == 'VENTA_CUENTA_CORRIENTE'
+                                  or movimiento.tipo.name()
+                                      == 'ANULACION_PAGO_CLIENTE'}"
+                          class="importe-debe">
+
+                        +$
+
+                        <span th:text="${movimiento.importe
+                                .stripTrailingZeros()
+                                .toPlainString()}">
+                        </span>
+
+                    </span>
+
+                    <span th:if="${movimiento.tipo.name()
+                                      == 'PAGO_CLIENTE'
+                                  or movimiento.tipo.name()
+                                      == 'CANCELACION_VENTA'}"
+                          class="importe-haber">
+
+                        -$
+
+                        <span th:text="${movimiento.importe
+                                .stripTrailingZeros()
+                                .toPlainString()}">
+                        </span>
+
+                    </span>
+
+                </td>
+
+                <td>
+
+                    <span th:if="${movimiento.saldoAnterior.compareTo(
+                                          T(java.math.BigDecimal).ZERO
+                                      ) > 0}"
+                          class="saldo-tabla-deuda">
+
+                        Debe $
+
+                        <span th:text="${movimiento.saldoAnterior
+                                .stripTrailingZeros()
+                                .toPlainString()}">
+                        </span>
+
+                    </span>
+
+                    <span th:if="${movimiento.saldoAnterior.compareTo(
+                                          T(java.math.BigDecimal).ZERO
+                                      ) == 0}"
+                          class="saldo-tabla-cero">
+                        $0
+                    </span>
+
+                    <span th:if="${movimiento.saldoAnterior.compareTo(
+                                          T(java.math.BigDecimal).ZERO
+                                      ) < 0}"
+                          class="saldo-tabla-favor">
+
+                        A favor $
+
+                        <span th:text="${movimiento.saldoAnterior
+                                .abs()
+                                .stripTrailingZeros()
+                                .toPlainString()}">
+                        </span>
+
+                    </span>
+
+                </td>
+
+                <td>
+
+                    <span th:if="${movimiento.saldoPosterior.compareTo(
+                                          T(java.math.BigDecimal).ZERO
+                                      ) > 0}"
+                          class="saldo-tabla-deuda">
+
+                        Debe $
+
+                        <span th:text="${movimiento.saldoPosterior
+                                .stripTrailingZeros()
+                                .toPlainString()}">
+                        </span>
+
+                    </span>
+
+                    <span th:if="${movimiento.saldoPosterior.compareTo(
+                                          T(java.math.BigDecimal).ZERO
+                                      ) == 0}"
+                          class="saldo-tabla-cero">
+                        $0
+                    </span>
+
+                    <span th:if="${movimiento.saldoPosterior.compareTo(
+                                          T(java.math.BigDecimal).ZERO
+                                      ) < 0}"
+                          class="saldo-tabla-favor">
+
+                        A favor $
+
+                        <span th:text="${movimiento.saldoPosterior
+                                .abs()
+                                .stripTrailingZeros()
+                                .toPlainString()}">
+                        </span>
+
+                    </span>
+
+                </td>
+
+                <td>
+
+                    <a th:if="${movimiento.venta != null}"
+                       class="ver"
+                       th:href="@{/ventas/detalle/{id}
+                                (id=${movimiento.venta.id})}">
+                        Venta #
+                        <span th:text="${movimiento.venta.id}">
+                        </span>
+                    </a>
+
+                    <span th:if="${movimiento.pagoCliente != null}"
+                          class="referencia-pago">
+
+                        <span>
+                            Pago #
+                            <span th:text="${movimiento.pagoCliente.id}">
+                            </span>
+                        </span>
+
+                        <span th:if="${T(java.lang.Boolean).TRUE.equals(
+                                    movimiento.pagoCliente.anulado
+                                )}"
+                              class="estado-pago estado-anulado">
+                            Anulado
+                        </span>
+
+                        <span th:if="${!T(java.lang.Boolean).TRUE.equals(
+                                    movimiento.pagoCliente.anulado
+                                )}"
+                              class="estado-pago estado-vigente">
+                            Vigente
+                        </span>
+
+                        <small th:text="${movimiento.pagoCliente.usuario == null
+                                ? 'Recibido por: sin registrar'
+                                : 'Recibido por: '
+                                  + movimiento.pagoCliente.usuario.nombreCompleto}">
+                        </small>
+
+                    </span>
+
+                    <span th:if="${movimiento.venta == null
+                                   and movimiento.pagoCliente == null}">
+                        -
+                    </span>
+
+                </td>
+
+                <td class="columna-accion">
+
+                    <form th:if="${movimiento.tipo.name() == 'PAGO_CLIENTE'
+                                  and movimiento.pagoCliente != null
+                                  and !T(java.lang.Boolean).TRUE.equals(
+                                      movimiento.pagoCliente.anulado
+                                  )}"
+                          class="form-anulacion"
+                          th:action="@{/clientes/{clienteId}/pagos/{pagoId}/anular(
+                                clienteId=${cliente.id},
+                                pagoId=${movimiento.pagoCliente.id}
+                          )}"
+                          method="post"
+                          onsubmit="return prepararAnulacionPago(this)">
+
+                        <input type="hidden"
+                               name="motivo"
+                               class="motivo-anulacion">
+
+                        <button type="submit"
+                                class="boton-anular-pago">
+                            Anular
+                        </button>
+
+                    </form>
+
+                    <span th:if="${movimiento.tipo.name() == 'PAGO_CLIENTE'
+                                  and movimiento.pagoCliente != null
+                                  and T(java.lang.Boolean).TRUE.equals(
+                                      movimiento.pagoCliente.anulado
+                                  )}"
+                          class="accion-anulada">
+                        Anulado
+                    </span>
+
+                    <span th:if="${movimiento.tipo.name() != 'PAGO_CLIENTE'}">
+                        -
+                    </span>
+
+                </td>
+
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(movimientos)}">
+
+                <td colspan="8"
+                    class="sin-datos">
+                    Todavía no hay movimientos de cuenta corriente.
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script>
+    function prepararAnulacionPago(formulario) {
+
+        const motivo = prompt(
+            "Motivo de la anulación (opcional):"
+        );
+
+        if (motivo === null) {
+            return false;
+        }
+
+        const motivoLimpio = motivo.trim();
+
+        if (motivoLimpio.length > 300) {
+            alert(
+                "El motivo no puede superar los 300 caracteres."
+            );
+
+            return false;
+        }
+
+        const confirmado = confirm(
+            "¿Confirmás la anulación del pago? "
+            + "El importe volverá al saldo del cliente "
+            + "y será descontado de la caja."
+        );
+
+        if (!confirmado) {
+            return false;
+        }
+
+        formulario
+            .querySelector(".motivo-anulacion")
+            .value = motivoLimpio;
+
+        return true;
+    }
+</script>
+
+</body>
+</html>

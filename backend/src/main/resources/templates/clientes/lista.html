@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Clientes | La Ferretería</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 40px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .contenedor {
+            max-width: 1400px;
+            margin: auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .encabezado {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .boton-nuevo {
+            display: inline-block;
+            padding: 10px 18px;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .boton-nuevo:hover {
+            background-color: #555;
+        }
+
+        .mensaje {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 5px;
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .error {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 5px;
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .tabla-contenedor {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 25px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+        }
+
+        tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .saldo-cero {
+            color: green;
+            font-weight: bold;
+        }
+
+        .saldo-deuda {
+            color: red;
+            font-weight: bold;
+        }
+
+        .saldo-favor {
+            color: #1d4ed8;
+            font-weight: bold;
+        }
+
+        .activo {
+            color: green;
+            font-weight: bold;
+        }
+
+        .inactivo {
+            color: red;
+            font-weight: bold;
+        }
+
+        .acciones {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .acciones form {
+            margin: 0;
+        }
+
+        .editar,
+        .estado {
+            display: inline-block;
+            padding: 7px 12px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .editar {
+            background-color: #dbeafe;
+            color: #1e3a8a;
+        }
+
+        .editar:hover {
+            background-color: #bfdbfe;
+        }
+
+        .desactivar {
+            background-color: #f3c5c5;
+            color: #8b0000;
+        }
+
+        .activar {
+            background-color: #c8e6c9;
+            color: #176b1b;
+        }
+
+        .sin-datos {
+            padding: 30px;
+            text-align: center;
+            color: #666;
+        }
+
+        .navegacion {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .volver {
+            display: inline-block;
+            padding: 9px 15px;
+            border-radius: 5px;
+            background-color: #ddd;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .volver:hover {
+            background-color: #c8c8c8;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 15px;
+            }
+
+            .contenedor {
+                padding: 20px;
+            }
+
+            .encabezado {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+        .buscador {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        .buscador input {
+            width: 350px;
+            max-width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+            font-size: 15px;
+        }
+
+        .buscador input:focus {
+            border-color: #2563eb;
+            outline: 2px solid rgba(37, 99, 235, 0.15);
+        }
+
+        .boton-buscar,
+        .boton-limpiar {
+            display: inline-block;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 5px;
+            font-size: 15px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .boton-buscar {
+            background-color: #333;
+            color: white;
+        }
+
+        .boton-limpiar {
+            background-color: #ddd;
+            color: #333;
+        }
+        .paginacion {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 18px 0;
+        }
+
+        .paginacion button {
+            width: 40px;
+            height: 36px;
+            border: 1px solid #b8b8b8;
+            border-radius: 5px;
+            background-color: white;
+            color: #222;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .paginacion button:hover:not(:disabled) {
+            background-color: #eeeeee;
+        }
+
+        .paginacion button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .paginacion span {
+            min-width: 130px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <div class="encabezado">
+
+        <div>
+            <h1>Clientes</h1>
+
+            <p>
+                Administración de clientes y cuentas corrientes.
+            </p>
+        </div>
+
+        <a class="boton-nuevo"
+           th:href="@{/clientes/nuevo}">
+            Nuevo cliente
+        </a>
+
+    </div>
+
+    <div th:if="${mensaje}"
+         class="mensaje"
+         th:text="${mensaje}">
+    </div>
+
+    <div th:if="${error}"
+         class="error"
+         th:text="${error}">
+    </div>
+
+    <form class="buscador"
+          th:action="@{/clientes}"
+          method="get">
+
+        <input type="text"
+               name="buscar"
+               th:value="${buscar}"
+               placeholder="Buscar por nombre o documento"
+               autocomplete="off">
+
+        <button type="submit"
+                class="boton-buscar">
+            Buscar
+        </button>
+
+        <a th:if="${buscar != null and !buscar.isBlank()}"
+           class="boton-limpiar"
+           th:href="@{/clientes}">
+            Limpiar
+        </a>
+
+    </form>
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Documento</th>
+                <th>Teléfono</th>
+                <th>Correo</th>
+                <th>Saldo de cuenta corriente</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="cliente : ${clientes}">
+
+                <td th:text="${cliente.nombre}">
+                </td>
+
+                <td th:text="${#strings.isEmpty(cliente.documento)
+                              ? '-'
+                              : cliente.documento}">
+                </td>
+
+                <td th:text="${#strings.isEmpty(cliente.telefono)
+                              ? '-'
+                              : cliente.telefono}">
+                </td>
+
+                <td th:text="${#strings.isEmpty(cliente.email)
+                              ? '-'
+                              : cliente.email}">
+                </td>
+
+                <td>
+
+                    <!-- Cuenta al día -->
+
+                    <span th:if="${cliente.saldoCuentaCorriente.compareTo(
+                                      T(java.math.BigDecimal).ZERO
+                                  ) == 0}"
+                          class="saldo-cero">
+
+                        $0 — Cuenta al día
+
+                    </span>
+
+                    <!-- El cliente debe dinero -->
+
+                    <span th:if="${cliente.saldoCuentaCorriente.compareTo(
+                                      T(java.math.BigDecimal).ZERO
+                                  ) > 0}"
+                          class="saldo-deuda">
+
+                        Debe $
+
+                        <span th:text="${cliente.saldoCuentaCorriente
+                                .stripTrailingZeros()
+                                .toPlainString()}">
+                        </span>
+
+                    </span>
+
+                    <!-- El cliente tiene dinero a favor -->
+
+                    <span th:if="${cliente.saldoCuentaCorriente.compareTo(
+                                      T(java.math.BigDecimal).ZERO
+                                  ) < 0}"
+                          class="saldo-favor">
+
+                        A favor $
+
+                        <span th:text="${cliente.saldoCuentaCorriente
+                                .abs()
+                                .stripTrailingZeros()
+                                .toPlainString()}">
+                        </span>
+
+                    </span>
+
+                </td>
+
+                <td>
+
+                    <span th:if="${cliente.activo}"
+                          class="activo">
+                        Activo
+                    </span>
+
+                    <span th:unless="${cliente.activo}"
+                          class="inactivo">
+                        Inactivo
+                    </span>
+
+                </td>
+
+                <td>
+
+                    <div class="acciones">
+
+                        <a class="editar"
+                           th:href="@{/clientes/detalle/{id}(id=${cliente.id})}">
+                            Ver cuenta
+                        </a>
+
+                        <a class="editar"
+                           th:href="@{/clientes/editar/{id}(id=${cliente.id})}">
+                            Editar
+                        </a>
+
+                        <form th:action="@{/clientes/estado/{id}(id=${cliente.id})}"
+                              method="post">
+
+                            <button th:if="${cliente.activo}"
+                                    type="submit"
+                                    class="estado desactivar"
+                                    onclick="return confirm('¿Desactivar este cliente?')">
+                                Desactivar
+                            </button>
+
+                            <button th:unless="${cliente.activo}"
+                                    type="submit"
+                                    class="estado activar">
+                                Activar
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(clientes)}">
+
+                <td colspan="7"
+                    class="sin-datos">
+
+                    <span th:if="${buscar == null or buscar.isBlank()}">
+                        Todavía no hay clientes registrados.
+                    </span>
+
+                    <span th:if="${buscar != null and !buscar.isBlank()}">
+                        No se encontraron clientes para:
+                        <strong th:text="${buscar}">
+                        </strong>
+                    </span>
+
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <nav th:if="${pagina != null and pagina.totalPages > 1}"
+         class="paginacion"
+         aria-label="Paginacion">
+        <button type="button"
+                title="Pagina anterior"
+                aria-label="Pagina anterior"
+                th:disabled="${!pagina.hasPrevious()}"
+                th:attr="data-pagina=${pagina.number - 1}"
+                onclick="cambiarPagina(this.dataset.pagina)">
+            &larr;
+        </button>
+
+        <span th:text="|Pagina ${pagina.number + 1} de ${pagina.totalPages}|">
+        </span>
+
+        <button type="button"
+                title="Pagina siguiente"
+                aria-label="Pagina siguiente"
+                th:disabled="${!pagina.hasNext()}"
+                th:attr="data-pagina=${pagina.number + 1}"
+                onclick="cambiarPagina(this.dataset.pagina)">
+            &rarr;
+        </button>
+    </nav>
+
+    <div class="navegacion">
+
+        <a class="volver"
+           th:href="@{/}">
+            Inicio
+        </a>
+
+        <a class="volver"
+           th:href="@{/ventas}">
+            Ir a ventas
+        </a>
+
+    </div>
+
+</div>
+
+<script>
+    function cambiarPagina(numeroPagina) {
+        const url = new URL(window.location.href);
+        url.searchParams.set("pagina", numeroPagina);
+        window.location.assign(url.toString());
+    }
+</script>
+
+</body>
+</html>

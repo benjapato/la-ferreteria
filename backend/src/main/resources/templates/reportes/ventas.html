@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Reporte de ventas | La Ferretería</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .contenedor {
+            max-width: 1400px;
+            margin: auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .filtros {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: end;
+            gap: 15px;
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 7px;
+        }
+
+        .campo {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+        }
+
+        .buscar {
+            padding: 11px 18px;
+            border: none;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+            cursor: pointer;
+        }
+
+        .error {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 5px;
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .resumen {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .tarjeta {
+            padding: 20px;
+            border-radius: 7px;
+            background-color: #f5f5f5;
+        }
+
+        .tarjeta strong {
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .valor {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .ganancia {
+            color: green;
+        }
+
+        .tabla-contenedor {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 25px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+        }
+
+        tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .ver {
+            display: inline-block;
+            padding: 7px 12px;
+            border-radius: 5px;
+            background-color: #dbeafe;
+            color: #1e3a8a;
+            text-decoration: none;
+        }
+
+        .sin-datos {
+            padding: 25px;
+            text-align: center;
+            color: #666;
+        }
+
+        .navegacion {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .volver {
+            display: inline-block;
+            padding: 9px 15px;
+            border-radius: 5px;
+            background-color: #ddd;
+            color: #333;
+            text-decoration: none;
+        }
+
+        @media (max-width: 900px) {
+            .resumen {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 15px;
+            }
+
+            .contenedor {
+                padding: 20px;
+            }
+
+            .resumen {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <h1>Reporte de ventas</h1>
+
+    <p>
+        Consultá las ventas confirmadas realizadas entre dos fechas.
+    </p>
+
+    <form class="filtros"
+          th:action="@{/reportes/ventas}"
+          method="get">
+
+        <div class="campo">
+
+            <label for="desde">
+                Desde
+            </label>
+
+            <input id="desde"
+                   type="date"
+                   name="desde"
+                   th:value="${desde}"
+                   required>
+
+        </div>
+
+        <div class="campo">
+
+            <label for="hasta">
+                Hasta
+            </label>
+
+            <input id="hasta"
+                   type="date"
+                   name="hasta"
+                   th:value="${hasta}"
+                   required>
+
+        </div>
+
+        <button type="submit"
+                class="buscar">
+            Generar reporte
+        </button>
+
+    </form>
+
+    <div th:if="${error}"
+         class="error"
+         th:text="${error}">
+    </div>
+
+    <div th:if="${reporte != null}">
+
+        <div class="resumen">
+
+            <div class="tarjeta">
+                <strong>Cantidad de ventas</strong>
+
+                <span class="valor"
+                      th:text="${reporte.cantidadVentas()}">
+                </span>
+            </div>
+
+            <div class="tarjeta">
+                <strong>Total vendido</strong>
+
+                <span class="valor">
+                    $ <span th:text="${reporte.totalVendido()}"></span>
+                </span>
+            </div>
+
+            <div class="tarjeta">
+                <strong>Costo total</strong>
+
+                <span class="valor">
+                    $ <span th:text="${reporte.costoTotal()}"></span>
+                </span>
+            </div>
+
+            <div class="tarjeta">
+                <strong>Ganancia bruta</strong>
+
+                <span class="valor ganancia">
+                    $ <span th:text="${reporte.gananciaTotal()}"></span>
+                </span>
+            </div>
+
+        </div>
+
+        <div class="tabla-contenedor">
+
+            <table>
+
+                <thead>
+                <tr>
+                    <th>Número</th>
+                    <th>Fecha</th>
+                    <th>Cliente</th>
+                    <th>Vendedor</th>
+                    <th>Forma de pago</th>
+                    <th>Total</th>
+                    <th>Costo</th>
+                    <th>Ganancia</th>
+                    <th>Detalle</th>
+                </tr>
+                </thead>
+
+                <tbody>
+
+                <tr th:each="venta : ${reporte.ventas()}">
+
+                    <td th:text="${venta.id}">
+                    </td>
+
+                    <td th:text="${#temporals.format(
+                            venta.fecha,
+                            'dd/MM/yyyy HH:mm'
+                        )}">
+                    </td>
+
+                    <td th:text="${venta.nombreCliente}">
+                    </td>
+
+                    <td th:text="${venta.usuario == null
+                            ? 'Sin registrar'
+                            : venta.usuario.nombreCompleto}">
+                    </td>
+
+                    <td th:text="${#strings.replace(
+                            venta.formaPago.name(),
+                            '_',
+                            ' '
+                        )}">
+                    </td>
+
+                    <td>
+                        $ <span th:text="${venta.total}"></span>
+                    </td>
+
+                    <td>
+                        $ <span th:text="${venta.costoTotal}"></span>
+                    </td>
+
+                    <td class="ganancia">
+                        $ <span th:text="${venta.gananciaTotal}"></span>
+                    </td>
+
+                    <td>
+                        <a class="ver"
+                           th:href="@{/ventas/detalle/{id}(id=${venta.id})}">
+                            Ver
+                        </a>
+                    </td>
+
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(reporte.ventas())}">
+
+                    <td colspan="9"
+                        class="sin-datos">
+                        No hay ventas confirmadas en el período seleccionado.
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <div class="navegacion">
+
+        <a class="volver"
+           th:href="@{/}">
+            Inicio
+        </a>
+
+        <a class="volver"
+           th:href="@{/productos}">
+            Ir a productos
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

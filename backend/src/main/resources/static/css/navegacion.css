@@ -1,0 +1,388 @@
+:root {
+    --app-panel-abierto: 310px;
+    --app-panel-cerrado: 64px;
+    --app-alto-cabecera: 68px;
+    --app-fondo: #f6f7f9;
+    --app-superficie: #ffffff;
+    --app-texto: #1d252b;
+    --app-texto-suave: #65717c;
+    --app-borde: #e1e5e8;
+    --app-oscuro: #1b2328;
+    --app-verde: #168052;
+    --app-verde-claro: #e8f4ed;
+}
+
+body.app-con-navegacion {
+    min-height: 100vh;
+    padding-top: calc(var(--app-alto-cabecera) + 30px) !important;
+    padding-left: calc(var(--app-panel-cerrado) + 30px) !important;
+    transition: padding-left 210ms ease;
+}
+
+body.app-con-navegacion.app-panel-expandido {
+    padding-left: calc(var(--app-panel-abierto) + 30px) !important;
+}
+
+.app-barra-superior,
+.app-barra-superior *,
+.app-panel-lateral,
+.app-panel-lateral * {
+    box-sizing: border-box;
+}
+
+.app-barra-superior {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    min-height: var(--app-alto-cabecera);
+    padding: 11px 28px;
+    background: var(--app-oscuro);
+    color: #ffffff;
+    border-bottom: 3px solid var(--app-verde);
+    box-shadow: 0 3px 12px rgba(23, 31, 38, 0.16);
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.app-marca {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+    color: #ffffff !important;
+    text-decoration: none !important;
+}
+
+.app-marca-sello {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    border: 1px solid #4b5a64;
+    border-radius: 8px;
+    background: #273138;
+    color: #bce5ce;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.app-marca-texto {
+    display: block;
+    min-width: 0;
+}
+
+.app-marca-texto strong,
+.app-marca-texto small {
+    display: block;
+    letter-spacing: 0;
+}
+
+.app-marca-texto strong {
+    color: #ffffff;
+    font-size: 22px;
+    line-height: 1.15;
+}
+
+.app-marca-texto small {
+    margin-top: 4px;
+    color: #bdc4cc;
+    font-size: 13px;
+}
+
+.app-usuario-superior {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.app-datos-usuario {
+    text-align: right;
+}
+
+.app-datos-usuario strong,
+.app-datos-usuario span {
+    display: block;
+    letter-spacing: 0;
+}
+
+.app-datos-usuario strong {
+    color: #ffffff;
+    font-size: 14px;
+}
+
+.app-datos-usuario span {
+    margin-top: 3px;
+    color: #bdc4cc;
+    font-size: 12px;
+}
+
+.app-cerrar-sesion-form {
+    margin: 0 !important;
+}
+
+.app-cerrar-sesion {
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 38px !important;
+    margin: 0 !important;
+    padding: 0 14px !important;
+    border: 1px solid #59636b !important;
+    border-radius: 7px !important;
+    background: transparent !important;
+    color: #ffffff !important;
+    font-family: "Segoe UI", Arial, sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    cursor: pointer;
+}
+
+.app-cerrar-sesion:hover {
+    background: #343b43 !important;
+}
+
+.app-panel-superposicion {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1001;
+    background: rgba(16, 24, 30, 0.42);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 190ms ease;
+}
+
+.app-panel-superposicion.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.app-panel-lateral {
+    position: fixed;
+    top: var(--app-alto-cabecera);
+    bottom: 0;
+    left: 0;
+    z-index: 1002;
+    width: var(--app-panel-cerrado);
+    overflow-y: auto;
+    background: var(--app-superficie);
+    color: var(--app-texto);
+    border-right: 1px solid var(--app-borde);
+    box-shadow: 8px 0 24px rgba(20, 29, 35, 0.1);
+    font-family: "Segoe UI", Arial, sans-serif;
+    transition: width 210ms ease, transform 220ms ease;
+}
+
+.app-panel-lateral.abierto {
+    width: var(--app-panel-abierto);
+}
+
+.app-panel-lateral:not(.abierto) {
+    overflow: hidden;
+}
+
+.app-panel-lateral:not(.abierto)::before {
+    content: "☰";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 62px;
+    color: var(--app-verde);
+    font-size: 22px;
+}
+
+.app-panel-lateral:not(.abierto) .app-panel-cabecera,
+.app-panel-lateral:not(.abierto) .app-navegacion-lateral {
+    display: none;
+}
+
+.app-panel-cabecera {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px 22px 20px;
+    border-bottom: 1px solid var(--app-borde);
+    background: #f8faf9;
+}
+
+.app-panel-cabecera span {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--app-verde);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.app-panel-cabecera h2 {
+    margin: 0 !important;
+    color: var(--app-texto) !important;
+    font-size: 21px !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0 !important;
+}
+
+.app-grupo-panel {
+    display: block;
+    padding: 20px 22px 8px;
+    color: var(--app-texto-suave);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.app-navegacion-lateral {
+    padding-bottom: 24px;
+}
+
+.app-navegacion-lateral a {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 50px;
+    margin: 0 10px 4px !important;
+    padding: 10px 12px !important;
+    border: 0 !important;
+    border-radius: 7px !important;
+    background: transparent !important;
+    color: var(--app-texto) !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+    letter-spacing: 0 !important;
+    text-decoration: none !important;
+}
+
+.app-navegacion-lateral a::after {
+    content: ">";
+    flex: 0 0 auto;
+    color: #95a0a9;
+    font-size: 13px;
+}
+
+.app-navegacion-lateral a:hover,
+.app-navegacion-lateral a.activo {
+    background: var(--app-verde-claro) !important;
+    color: #12653f !important;
+}
+
+.app-navegacion-lateral a.activo {
+    box-shadow: inset 3px 0 0 var(--app-verde);
+}
+
+.app-panel-lateral:focus-visible,
+.app-cerrar-sesion:focus-visible,
+.app-marca:focus-visible,
+.app-navegacion-lateral a:focus-visible {
+    outline: 2px solid #66bd8c !important;
+    outline-offset: 2px;
+}
+
+@media (min-width: 761px) {
+    .app-panel-lateral:hover {
+        width: var(--app-panel-abierto);
+    }
+
+    .app-panel-lateral:not(.abierto):hover::before {
+        display: none;
+    }
+
+    .app-panel-lateral:not(.abierto):hover .app-panel-cabecera {
+        display: flex;
+    }
+
+    .app-panel-lateral:not(.abierto):hover .app-navegacion-lateral {
+        display: block;
+    }
+}
+
+@media (max-width: 760px) {
+    :root {
+        --app-alto-cabecera: 75px;
+    }
+
+    body.app-con-navegacion,
+    body.app-con-navegacion.app-panel-expandido {
+        padding-top: calc(var(--app-alto-cabecera) + 20px) !important;
+        padding-left: calc(var(--app-panel-cerrado) + 16px) !important;
+        padding-right: 16px !important;
+    }
+
+    body.app-con-navegacion.app-panel-movil-abierto {
+        overflow: hidden;
+    }
+
+    .app-panel-superposicion {
+        display: block;
+    }
+
+    .app-panel-lateral,
+    .app-panel-lateral.abierto {
+        width: min(340px, 92vw);
+        transform: translateX(calc(-100% + var(--app-panel-cerrado)));
+    }
+
+    .app-panel-lateral.abierto {
+        transform: translateX(0);
+    }
+
+    .app-panel-lateral:not(.abierto)::before {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: var(--app-panel-cerrado);
+    }
+
+    .app-barra-superior {
+        padding: 11px 16px 11px calc(var(--app-panel-cerrado) + 12px);
+    }
+
+    .app-marca-texto small,
+    .app-datos-usuario {
+        display: none;
+    }
+
+    .app-marca-texto strong {
+        font-size: 17px;
+        white-space: nowrap;
+    }
+
+    .app-marca-sello {
+        display: none;
+    }
+
+    .app-cerrar-sesion {
+        width: 42px !important;
+        padding: 0 !important;
+        overflow: hidden;
+        color: transparent !important;
+    }
+
+    .app-cerrar-sesion::before {
+        content: "Salir";
+        color: #ffffff;
+        font-size: 11px;
+    }
+}
+
+@media print {
+    body.app-con-navegacion,
+    body.app-con-navegacion.app-panel-expandido {
+        padding: 0 !important;
+    }
+
+    .app-barra-superior,
+    .app-panel-lateral,
+    .app-panel-superposicion {
+        display: none !important;
+    }
+}

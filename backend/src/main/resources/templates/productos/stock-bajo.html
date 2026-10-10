@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Stock bajo | La Ferretería</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .contenedor {
+            max-width: 1200px;
+            margin: auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .resumen {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            background-color: #fff3cd;
+            color: #664d03;
+        }
+
+        .tabla-contenedor {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 25px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+        }
+
+        tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .stock-bajo {
+            color: #b45309;
+            font-weight: bold;
+        }
+
+        .sin-stock {
+            color: red;
+            font-weight: bold;
+        }
+
+        .faltante {
+            color: red;
+            font-weight: bold;
+        }
+
+        .sin-datos {
+            padding: 30px;
+            text-align: center;
+            color: green;
+            font-weight: bold;
+        }
+
+        .acciones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .boton {
+            display: inline-block;
+            padding: 10px 17px;
+            border-radius: 5px;
+            background-color: #ddd;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .boton-compra {
+            background-color: #333;
+            color: white;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 15px;
+            }
+
+            .contenedor {
+                padding: 20px;
+            }
+        }
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <h1>Productos con stock bajo</h1>
+
+    <p>
+        Productos cuyo stock actual es menor o igual al stock mínimo.
+    </p>
+
+    <div class="resumen"
+         th:if="${!#lists.isEmpty(productos)}">
+
+        Hay
+
+        <strong th:text="${#lists.size(productos)}">
+        </strong>
+
+        producto(s) que necesitan reposición.
+
+    </div>
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+            <tr>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Marca</th>
+                <th>Categoría</th>
+                <th>Stock actual</th>
+                <th>Stock mínimo</th>
+                <th>Faltante recomendado</th>
+                <th>Unidad</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="producto : ${productos}">
+
+                <td th:text="${producto.codigo}">
+                </td>
+
+                <td th:text="${producto.nombre}">
+                </td>
+
+                <td th:text="${#strings.isEmpty(producto.marca)
+                              ? '-'
+                              : producto.marca}">
+                </td>
+
+                <td th:text="${producto.categoria.nombre}">
+                </td>
+
+                <td>
+
+                    <span th:if="${producto.stockActual.compareTo(
+                                      T(java.math.BigDecimal).ZERO
+                                  ) == 0}"
+                          class="sin-stock">
+                        Sin stock
+                    </span>
+
+                    <span th:unless="${producto.stockActual.compareTo(
+                                          T(java.math.BigDecimal).ZERO
+                                      ) == 0}"
+                          class="stock-bajo"
+                          th:text="${producto.stockActual
+                                  .stripTrailingZeros()
+                                  .toPlainString()}">
+                    </span>
+
+                </td>
+
+                <td th:text="${producto.stockMinimo
+                        .stripTrailingZeros()
+                        .toPlainString()}">
+                </td>
+
+                <td class="faltante"
+                    th:text="${producto.stockMinimo
+                            .subtract(producto.stockActual)
+                            .stripTrailingZeros()
+                            .toPlainString()}">
+                </td>
+
+                <td th:text="${#strings.replace(
+                        producto.unidadMedida.name(),
+                        '_',
+                        ' '
+                    )}">
+                </td>
+
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(productos)}">
+
+                <td colspan="8"
+                    class="sin-datos">
+                    No hay productos con stock bajo.
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="acciones">
+        <a class="boton"
+           th:href="@{/}">
+            Inicio
+        </a>
+
+        <a class="boton"
+           th:href="@{/productos}">
+            Volver a productos
+        </a>
+
+        <a class="boton boton-compra"
+           th:href="@{/compras/nueva}">
+            Registrar compra
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

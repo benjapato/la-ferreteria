@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Productos más vendidos | La Ferretería</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 40px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .contenedor {
+            max-width: 1300px;
+            margin: auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .filtros {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: end;
+            gap: 15px;
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 7px;
+        }
+
+        .campo {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+        }
+
+        .generar {
+            padding: 11px 18px;
+            border: none;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+            cursor: pointer;
+        }
+
+        .generar:hover {
+            background-color: #555;
+        }
+
+        .error {
+            margin-top: 20px;
+            padding: 13px;
+            border-radius: 5px;
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .resumen {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            background-color: #dbeafe;
+            color: #1e3a8a;
+        }
+
+        .tabla-contenedor {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 25px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+        }
+
+        tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .posicion {
+            width: 70px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .primero {
+            color: #b45309;
+        }
+
+        .cantidad {
+            font-weight: bold;
+            color: #1d4ed8;
+        }
+
+        .ganancia {
+            font-weight: bold;
+            color: green;
+        }
+
+        .sin-datos {
+            padding: 30px;
+            text-align: center;
+            color: #666;
+        }
+
+        .navegacion {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .volver {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 5px;
+            background-color: #ddd;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .volver:hover {
+            background-color: #c8c8c8;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 15px;
+            }
+
+            .contenedor {
+                padding: 20px;
+            }
+        }
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <h1>Productos más vendidos</h1>
+
+    <p>
+        Ranking de productos vendidos dentro del período seleccionado.
+        Las ventas canceladas no se incluyen.
+    </p>
+
+    <form class="filtros"
+          th:action="@{/reportes/productos}"
+          method="get">
+
+        <div class="campo">
+
+            <label for="desde">
+                Desde
+            </label>
+
+            <input id="desde"
+                   type="date"
+                   name="desde"
+                   th:value="${desde}"
+                   required>
+
+        </div>
+
+        <div class="campo">
+
+            <label for="hasta">
+                Hasta
+            </label>
+
+            <input id="hasta"
+                   type="date"
+                   name="hasta"
+                   th:value="${hasta}"
+                   required>
+
+        </div>
+
+        <button type="submit"
+                class="generar">
+            Generar reporte
+        </button>
+
+    </form>
+
+    <div th:if="${error}"
+         class="error"
+         th:text="${error}">
+    </div>
+
+    <div th:if="${productos != null
+                 and !#lists.isEmpty(productos)}"
+         class="resumen">
+
+        Se encontraron
+
+        <strong th:text="${#lists.size(productos)}">
+        </strong>
+
+        producto(s) vendidos en el período seleccionado.
+
+    </div>
+
+    <div class="tabla-contenedor"
+         th:if="${productos != null}">
+
+        <table>
+
+            <thead>
+            <tr>
+                <th>Posición</th>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Cantidad vendida</th>
+                <th>Ventas realizadas</th>
+                <th>Total facturado</th>
+                <th>Ganancia generada</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="producto, estado : ${productos}">
+
+                <td class="posicion"
+                    th:classappend="${estado.index == 0}
+                                    ? ' primero'
+                                    : ''">
+
+                    <span th:text="${estado.index + 1}">
+                    </span>
+
+                </td>
+
+                <td th:text="${producto.codigo()}">
+                </td>
+
+                <td th:text="${producto.nombre()}">
+                </td>
+
+                <td class="cantidad"
+                    th:text="${producto.cantidadVendida()
+                            .stripTrailingZeros()
+                            .toPlainString()}">
+                </td>
+
+                <td th:text="${producto.cantidadVentas()}">
+                </td>
+
+                <td>
+                    $
+                    <span th:text="${producto.totalVendido()}">
+                    </span>
+                </td>
+
+                <td class="ganancia">
+                    $
+                    <span th:text="${producto.gananciaGenerada()}">
+                    </span>
+                </td>
+
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(productos)}">
+
+                <td colspan="7"
+                    class="sin-datos">
+                    No hay productos vendidos en el período seleccionado.
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="navegacion">
+
+        <a class="volver"
+           th:href="@{/}">
+            Inicio
+        </a>
+
+        <a class="volver"
+           th:href="@{/reportes/ventas}">
+            Reporte de ventas
+        </a>
+
+        <a class="volver"
+           th:href="@{/ventas}">
+            Historial de ventas
+        </a>
+
+        <a class="volver"
+           th:href="@{/productos}">
+            Productos
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

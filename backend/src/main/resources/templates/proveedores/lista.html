@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Proveedores | La Ferretería</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .contenedor {
+            max-width: 1300px;
+            margin: auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .encabezado {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .boton-nuevo {
+            display: inline-block;
+            padding: 10px 18px;
+            background-color: #333;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            white-space: nowrap;
+        }
+
+        .boton-nuevo:hover {
+            background-color: #555;
+        }
+
+        .tabla-contenedor {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+        }
+
+        tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .activo {
+            color: green;
+            font-weight: bold;
+        }
+
+        .inactivo {
+            color: red;
+            font-weight: bold;
+        }
+
+        .acciones {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .acciones form {
+            margin: 0;
+        }
+
+        .boton-editar {
+            display: inline-block;
+            padding: 7px 12px;
+            background-color: #e0e0e0;
+            color: #333;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .boton-editar:hover {
+            background-color: #c8c8c8;
+        }
+
+        .boton-desactivar,
+        .boton-activar {
+            padding: 7px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .boton-desactivar {
+            background-color: #f3c5c5;
+            color: #8b0000;
+        }
+
+        .boton-activar {
+            background-color: #c8e6c9;
+            color: #176b1b;
+        }
+
+        .sin-datos {
+            padding: 25px;
+            text-align: center;
+            color: #666;
+        }
+
+        .navegacion {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .volver {
+            display: inline-block;
+            padding: 9px 15px;
+            background-color: #ddd;
+            color: #333;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 15px;
+            }
+
+            .encabezado {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <div class="encabezado">
+
+        <div>
+            <h1>Proveedores</h1>
+            <p>Proveedores registrados en la ferretería.</p>
+        </div>
+
+        <a class="boton-nuevo"
+           th:href="@{/proveedores/nuevo}">
+            Nuevo proveedor
+        </a>
+
+    </div>
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Razón social</th>
+                <th>CUIT</th>
+                <th>Teléfono</th>
+                <th>Correo</th>
+                <th>Dirección</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="proveedor : ${proveedores}">
+
+                <td th:text="${proveedor.nombre}"></td>
+
+                <td th:text="${#strings.isEmpty(proveedor.razonSocial)
+                              ? '-'
+                              : proveedor.razonSocial}">
+                </td>
+
+                <td th:text="${#strings.isEmpty(proveedor.cuit)
+                              ? '-'
+                              : proveedor.cuit}">
+                </td>
+
+                <td th:text="${#strings.isEmpty(proveedor.telefono)
+                              ? '-'
+                              : proveedor.telefono}">
+                </td>
+
+                <td th:text="${#strings.isEmpty(proveedor.email)
+                              ? '-'
+                              : proveedor.email}">
+                </td>
+
+                <td th:text="${#strings.isEmpty(proveedor.direccion)
+                              ? '-'
+                              : proveedor.direccion}">
+                </td>
+
+                <td>
+                    <span th:if="${proveedor.activo}"
+                          class="activo">
+                        Activo
+                    </span>
+
+                    <span th:unless="${proveedor.activo}"
+                          class="inactivo">
+                        Inactivo
+                    </span>
+                </td>
+
+                <td>
+                    <div class="acciones">
+
+                        <a class="boton-editar"
+                           th:href="@{/proveedores/editar/{id}(id=${proveedor.id})}">
+                            Editar
+                        </a>
+
+                        <form th:action="@{/proveedores/cambiar-estado/{id}(id=${proveedor.id})}"
+                              method="post">
+
+                            <button type="submit"
+                                    th:class="${proveedor.activo}
+                                        ? 'boton-desactivar'
+                                        : 'boton-activar'"
+                                    th:text="${proveedor.activo}
+                                        ? 'Desactivar'
+                                        : 'Activar'">
+                            </button>
+
+                        </form>
+
+                    </div>
+                </td>
+
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(proveedores)}">
+
+                <td colspan="8"
+                    class="sin-datos">
+                    Todavía no hay proveedores registrados.
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="navegacion">
+
+        <a class="volver"
+           th:href="@{/}">
+            Inicio
+        </a>
+
+        <a class="volver"
+           th:href="@{/productos}">
+            Ir a productos
+        </a>
+
+        <a class="volver"
+           th:href="@{/categorias}">
+            Ir a categorías
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

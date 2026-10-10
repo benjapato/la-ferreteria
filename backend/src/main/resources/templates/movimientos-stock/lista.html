@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Movimientos de stock | La Ferretería</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .contenedor {
+            max-width: 1400px;
+            margin: auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .encabezado {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .boton-ajuste {
+            display: inline-block;
+            padding: 10px 18px;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .boton-ajuste:hover {
+            background-color: #555;
+        }
+
+        .mensaje {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 5px;
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .error {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 5px;
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .tabla-contenedor {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+        }
+
+        tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .entrada {
+            color: green;
+            font-weight: bold;
+        }
+
+        .salida {
+            color: red;
+            font-weight: bold;
+        }
+
+        .ajuste {
+            color: #b45309;
+            font-weight: bold;
+        }
+
+        .cantidad-entrada {
+            color: green;
+            font-weight: bold;
+        }
+
+        .cantidad-salida {
+            color: red;
+            font-weight: bold;
+        }
+
+        .referencia {
+            font-weight: bold;
+        }
+
+        .sin-datos {
+            padding: 30px;
+            text-align: center;
+            color: #666;
+        }
+
+        .navegacion {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .volver {
+            display: inline-block;
+            padding: 9px 15px;
+            background-color: #ddd;
+            color: #333;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .volver:hover {
+            background-color: #c8c8c8;
+        }
+
+        .ajuste-manual {
+            background-color: #fff3cd;
+            color: #664d03;
+        }
+
+        @media (max-width: 800px) {
+            body {
+                padding: 15px;
+            }
+
+            .contenedor {
+                padding: 20px;
+            }
+
+            .encabezado {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+        .paginacion {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 18px 0;
+        }
+
+        .paginacion button {
+            width: 40px;
+            height: 36px;
+            border: 1px solid #b8b8b8;
+            border-radius: 5px;
+            background-color: white;
+            color: #222;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .paginacion button:hover:not(:disabled) {
+            background-color: #eeeeee;
+        }
+
+        .paginacion button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .paginacion span {
+            min-width: 130px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <div class="encabezado">
+
+        <div>
+            <h1>Movimientos de stock</h1>
+
+            <p>
+                Historial de entradas, salidas, ventas,
+                compras y ajustes manuales.
+            </p>
+        </div>
+
+    </div>
+
+    <div th:if="${mensaje}"
+         class="mensaje"
+         th:text="${mensaje}">
+    </div>
+
+    <div th:if="${error}"
+         class="error"
+         th:text="${error}">
+    </div>
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Producto</th>
+                <th>Tipo</th>
+                <th>Cantidad</th>
+                <th>Stock anterior</th>
+                <th>Stock posterior</th>
+                <th>Responsable</th>
+                <th>Referencia</th>
+                <th>Observación</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="movimiento : ${movimientos}">
+
+                <td th:text="${#temporals.format(
+                        movimiento.fecha,
+                        'dd/MM/yyyy HH:mm'
+                    )}">
+                </td>
+
+                <td>
+
+                    <strong th:text="${movimiento.producto.codigo}">
+                    </strong>
+
+                    <span> - </span>
+
+                    <span th:text="${movimiento.producto.nombre}">
+                    </span>
+
+                </td>
+
+                <td>
+
+                    <span th:if="${movimiento.tipo.name() == 'ENTRADA_COMPRA'}"
+                          class="entrada">
+                        Entrada por compra
+                    </span>
+
+                    <span th:if="${movimiento.tipo.name() == 'SALIDA_VENTA'}"
+                          class="salida">
+                        Salida por venta
+                    </span>
+
+                    <span th:if="${movimiento.tipo.name()
+                                  == 'ENTRADA_ANULACION_VENTA'}"
+                          class="entrada">
+                        Entrada por cancelación de venta
+                    </span>
+
+                    <span th:if="${movimiento.tipo.name() == 'AJUSTE_ENTRADA'}"
+                          class="ajuste">
+                        Ajuste de entrada
+                    </span>
+
+                    <span th:if="${movimiento.tipo.name() == 'AJUSTE_SALIDA'}"
+                          class="ajuste">
+                        Ajuste de salida
+                    </span>
+
+                </td>
+
+                <td>
+
+                    <span th:if="${movimiento.tipo.name() == 'ENTRADA_COMPRA'
+                                  or movimiento.tipo.name()
+                                     == 'ENTRADA_ANULACION_VENTA'
+                                  or movimiento.tipo.name()
+                                     == 'AJUSTE_ENTRADA'}"
+                          class="cantidad-entrada">
+                        +
+                    </span>
+
+                    <span th:if="${movimiento.tipo.name() == 'SALIDA_VENTA'
+                                  or movimiento.tipo.name()
+                                     == 'AJUSTE_SALIDA'}"
+                          class="cantidad-salida">
+                        -
+                    </span>
+
+                    <span th:text="${movimiento.cantidad
+                            .stripTrailingZeros()
+                            .toPlainString()}">
+                    </span>
+
+                </td>
+
+                <td th:text="${movimiento.stockAnterior
+                        .stripTrailingZeros()
+                        .toPlainString()}">
+                </td>
+
+                <td th:text="${movimiento.stockPosterior
+                        .stripTrailingZeros()
+                        .toPlainString()}">
+                </td>
+
+                <td th:text="${movimiento.usuario == null
+                        ? 'Sin registrar'
+                        : movimiento.usuario.nombreCompleto}">
+                </td>
+
+                <td class="referencia">
+
+                    <span th:if="${movimiento.compra != null}">
+                        Compra #
+                        <span th:text="${movimiento.compra.id}">
+                        </span>
+                    </span>
+
+                    <span th:if="${movimiento.venta != null}">
+                        Venta #
+                        <span th:text="${movimiento.venta.id}">
+                        </span>
+                    </span>
+
+                    <span th:if="${movimiento.compra == null
+                                  and movimiento.venta == null}"
+                          class="ajuste-manual">
+                        Ajuste manual
+                    </span>
+
+                </td>
+
+                <td th:text="${#strings.isEmpty(movimiento.observacion)
+                              ? '-'
+                              : movimiento.observacion}">
+                </td>
+
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(movimientos)}">
+
+                <td colspan="9"
+                    class="sin-datos">
+                    Todavía no hay movimientos de stock registrados.
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <nav th:if="${pagina != null and pagina.totalPages > 1}"
+         class="paginacion"
+         aria-label="Paginacion">
+        <button type="button"
+                title="Pagina anterior"
+                aria-label="Pagina anterior"
+                th:disabled="${!pagina.hasPrevious()}"
+                th:attr="data-pagina=${pagina.number - 1}"
+                onclick="cambiarPagina(this.dataset.pagina)">
+            &larr;
+        </button>
+
+        <span th:text="|Pagina ${pagina.number + 1} de ${pagina.totalPages}|">
+        </span>
+
+        <button type="button"
+                title="Pagina siguiente"
+                aria-label="Pagina siguiente"
+                th:disabled="${!pagina.hasNext()}"
+                th:attr="data-pagina=${pagina.number + 1}"
+                onclick="cambiarPagina(this.dataset.pagina)">
+            &rarr;
+        </button>
+    </nav>
+
+    <div class="navegacion">
+
+        <a class="volver"
+           th:href="@{/}">
+            Inicio
+        </a>
+
+    </div>
+
+</div>
+
+<script>
+    function cambiarPagina(numeroPagina) {
+        const url = new URL(window.location.href);
+        url.searchParams.set("pagina", numeroPagina);
+        window.location.assign(url.toString());
+    }
+</script>
+
+</body>
+</html>

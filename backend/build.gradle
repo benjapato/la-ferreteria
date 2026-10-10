@@ -1,0 +1,102 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '4.1.0'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.LaFerreteria'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	compileOnly 'org.projectlombok:lombok'
+	runtimeOnly 'org.postgresql:postgresql'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testCompileOnly 'org.projectlombok:lombok'
+	testRuntimeOnly 'com.h2database:h2'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+def frontendDir = file('../frontend')
+def generatedFrontendDir = layout.buildDirectory.dir('generated-resources/frontend')
+def windows = System.getProperty('os.name').toLowerCase().contains('windows')
+def programFiles = System.getenv('ProgramFiles') ?: 'C:/Program Files'
+def windowsNodeDir = file("${programFiles}/nodejs")
+def npxExecutable = windows && file("${windowsNodeDir}/npx.cmd").exists()
+		? file("${windowsNodeDir}/npx.cmd").absolutePath
+		: (windows ? 'npx.cmd' : 'npx')
+
+tasks.register('frontendInstall', Exec) {
+	group = 'build'
+	description = 'Instala las dependencias bloqueadas del frontend React.'
+	workingDir frontendDir
+	if (windows && windowsNodeDir.exists()) {
+		environment 'PATH', "${windowsNodeDir};${System.getenv('PATH') ?: ''}"
+	}
+	commandLine npxExecutable, '--yes', 'pnpm@11.9.0', 'install', '--frozen-lockfile'
+	inputs.files(file('../frontend/package.json'), file('../frontend/pnpm-lock.yaml'))
+	outputs.dir(file('../frontend/node_modules'))
+}
+
+tasks.register('frontendBuild', Exec) {
+	group = 'build'
+	description = 'Compila React con la ruta de produccion /app.'
+	dependsOn 'frontendInstall'
+	workingDir frontendDir
+	if (windows && windowsNodeDir.exists()) {
+		environment 'PATH', "${windowsNodeDir};${System.getenv('PATH') ?: ''}"
+	}
+	commandLine npxExecutable, '--yes', 'pnpm@11.9.0', 'run', 'build', '--base=/app/'
+	inputs.dir(file('../frontend/src'))
+	inputs.dir(file('../frontend/public'))
+	inputs.files(
+			file('../frontend/index.html'),
+			file('../frontend/package.json'),
+			file('../frontend/pnpm-lock.yaml'),
+			file('../frontend/vite.config.js')
+	)
+	inputs.property('productionBasePath', '/app/')
+	outputs.dir(file('../frontend/dist'))
+}
+
+tasks.register('syncFrontend', Sync) {
+	group = 'build'
+	description = 'Incluye la compilacion de React entre los recursos de Spring Boot.'
+	dependsOn 'frontendBuild'
+	from file('../frontend/dist')
+	into generatedFrontendDir.map { it.dir('static/app') }
+}
+
+sourceSets {
+	main {
+		resources.srcDir generatedFrontendDir
+	}
+}
+
+tasks.named('processResources') {
+	dependsOn 'syncFrontend'
+}

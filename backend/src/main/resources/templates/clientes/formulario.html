@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title th:text="${cliente.id == null
+            ? 'Nuevo cliente | La Ferretería'
+            : 'Editar cliente | La Ferretería'}">
+    </title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 40px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .contenedor {
+            max-width: 850px;
+            margin: auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .fila {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .campo {
+            margin-top: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+            font-size: 15px;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .error {
+            margin-bottom: 20px;
+            padding: 13px;
+            border-radius: 5px;
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .error-campo {
+            display: block;
+            margin-top: 5px;
+            color: red;
+            font-size: 13px;
+        }
+
+        .aviso {
+            margin-top: 20px;
+            padding: 13px;
+            border-radius: 5px;
+            background-color: #dbeafe;
+            color: #1e3a8a;
+        }
+
+        .acciones {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .boton {
+            display: inline-block;
+            padding: 11px 18px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .guardar {
+            background-color: #333;
+            color: white;
+        }
+
+        .volver {
+            background-color: #ddd;
+            color: #333;
+        }
+
+        @media (max-width: 650px) {
+            body {
+                padding: 15px;
+            }
+
+            .contenedor {
+                padding: 20px;
+            }
+
+            .fila {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+        }
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <h1 th:text="${cliente.id == null
+            ? 'Nuevo cliente'
+            : 'Editar cliente'}">
+    </h1>
+
+    <div th:if="${error}"
+         class="error"
+         th:text="${error}">
+    </div>
+
+    <form th:action="@{/clientes/guardar}"
+          th:object="${cliente}"
+          method="post">
+
+        <input type="hidden"
+               th:field="*{id}">
+
+        <div class="campo">
+
+            <label for="nombre">
+                Nombre completo
+            </label>
+
+            <input id="nombre"
+                   type="text"
+                   th:field="*{nombre}"
+                   maxlength="150"
+                   placeholder="Ejemplo: Juan Pérez"
+                   required>
+
+            <span class="error-campo"
+                  th:if="${#fields.hasErrors('nombre')}"
+                  th:errors="*{nombre}">
+            </span>
+
+        </div>
+
+        <div class="fila">
+
+            <div class="campo">
+
+                <label for="documento">
+                    DNI, CUIT o CUIL
+                </label>
+
+                <input id="documento"
+                       type="text"
+                       th:field="*{documento}"
+                       maxlength="30"
+                       placeholder="Ejemplo: 30123456">
+
+                <span class="error-campo"
+                      th:if="${#fields.hasErrors('documento')}"
+                      th:errors="*{documento}">
+                </span>
+
+            </div>
+
+            <div class="campo">
+
+                <label for="telefono">
+                    Teléfono
+                </label>
+
+                <input id="telefono"
+                       type="text"
+                       th:field="*{telefono}"
+                       maxlength="50"
+                       placeholder="Ejemplo: 2634000000">
+
+                <span class="error-campo"
+                      th:if="${#fields.hasErrors('telefono')}"
+                      th:errors="*{telefono}">
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="campo">
+
+            <label for="email">
+                Correo electrónico
+            </label>
+
+            <input id="email"
+                   type="email"
+                   th:field="*{email}"
+                   maxlength="150"
+                   placeholder="Ejemplo: cliente@gmail.com">
+
+            <span class="error-campo"
+                  th:if="${#fields.hasErrors('email')}"
+                  th:errors="*{email}">
+            </span>
+
+        </div>
+
+        <div class="campo">
+
+            <label for="direccion">
+                Dirección
+            </label>
+
+            <textarea id="direccion"
+                      th:field="*{direccion}"
+                      maxlength="250"
+                      placeholder="Dirección del cliente">
+            </textarea>
+
+            <span class="error-campo"
+                  th:if="${#fields.hasErrors('direccion')}"
+                  th:errors="*{direccion}">
+            </span>
+
+        </div>
+
+        <div th:if="${cliente.id != null}"
+             class="aviso">
+
+            El saldo de cuenta corriente no se modifica desde este
+            formulario.
+
+            Saldo actual:
+
+            <strong>
+                $ <span th:text="${cliente.saldoCuentaCorriente}">
+                </span>
+            </strong>
+
+        </div>
+
+        <div class="acciones">
+            <a class="boton volver"
+               th:href="@{/}">
+                Inicio
+            </a>
+
+            <button type="submit"
+                    class="boton guardar">
+                Guardar cliente
+            </button>
+
+            <a class="boton volver"
+               th:href="@{/clientes}">
+                Volver
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>

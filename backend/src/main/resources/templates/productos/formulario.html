@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Nuevo producto | La Ferretería</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .contenedor {
+            max-width: 850px;
+            margin: auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .fila {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .campo {
+            margin-top: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .acciones {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        button,
+        .volver {
+            display: inline-block;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        button {
+            background-color: #333;
+            color: white;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        .volver {
+            background-color: #ddd;
+            color: #333;
+        }
+
+        .error {
+            color: #b00020;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .error-general {
+            background-color: #f8d7da;
+            color: #842029;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 700px) {
+            .fila {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+        }
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <h1 th:text="${producto.id == null}
+        ? 'Nuevo producto'
+        : 'Editar producto'">
+    </h1>
+
+    <p>Ingresá los datos del producto.</p>
+
+    <div th:if="${error}"
+         class="error-general"
+         th:text="${error}">
+    </div>
+
+    <form th:action="@{/productos/guardar}"
+          th:object="${producto}"
+          method="post">
+
+        <input type="hidden"
+               th:field="*{id}">
+
+        <div class="fila">
+
+            <div class="campo">
+                <label for="codigo">Código</label>
+
+                <input id="codigo"
+                       type="text"
+                       th:field="*{codigo}"
+                       placeholder="Ejemplo: MART-001">
+
+                <div class="error"
+                     th:if="${#fields.hasErrors('codigo')}"
+                     th:errors="*{codigo}">
+                </div>
+            </div>
+
+            <div class="campo">
+                <label for="nombre">Nombre</label>
+
+                <input id="nombre"
+                       type="text"
+                       th:field="*{nombre}"
+                       placeholder="Ejemplo: Martillo carpintero">
+
+                <div class="error"
+                     th:if="${#fields.hasErrors('nombre')}"
+                     th:errors="*{nombre}">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="fila">
+
+            <div class="campo">
+                <label for="marca">Marca</label>
+
+                <input id="marca"
+                       type="text"
+                       th:field="*{marca}"
+                       placeholder="Ejemplo: Stanley">
+
+                <div class="error"
+                     th:if="${#fields.hasErrors('marca')}"
+                     th:errors="*{marca}">
+                </div>
+            </div>
+
+            <div class="campo">
+                <label for="categoria">Categoría</label>
+
+                <select id="categoria"
+                        th:field="*{categoria.id}">
+
+                    <option value="">
+                        Seleccione una categoría
+                    </option>
+
+                    <option th:each="categoria : ${categorias}"
+                            th:value="${categoria.id}"
+                            th:text="${categoria.nombre}">
+                    </option>
+
+                </select>
+
+                <div class="error"
+                     th:if="${#fields.hasErrors('categoria')}"
+                     th:errors="*{categoria}">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="campo">
+            <label for="descripcion">Descripción</label>
+
+            <textarea id="descripcion"
+                      th:field="*{descripcion}"
+                      placeholder="Descripción opcional del producto">
+            </textarea>
+
+            <div class="error"
+                 th:if="${#fields.hasErrors('descripcion')}"
+                 th:errors="*{descripcion}">
+            </div>
+        </div>
+
+        <div class="fila">
+
+            <div class="campo">
+                <label for="precioCompra">Precio de compra</label>
+
+                <input id="precioCompra"
+                       type="number"
+                       min="0"
+                       step="0.01"
+                       th:field="*{precioCompra}"
+                       placeholder="0.00">
+
+                <div class="error"
+                     th:if="${#fields.hasErrors('precioCompra')}"
+                     th:errors="*{precioCompra}">
+                </div>
+            </div>
+
+            <div class="campo">
+                <label for="precioVenta">Precio de venta</label>
+
+                <input id="precioVenta"
+                       type="number"
+                       min="0.01"
+                       step="0.01"
+                       th:field="*{precioVenta}"
+                       placeholder="0.00">
+
+                <div class="error"
+                     th:if="${#fields.hasErrors('precioVenta')}"
+                     th:errors="*{precioVenta}">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="fila">
+
+            <div class="campo">
+                <label for="stockActual">Stock actual</label>
+
+                <input id="stockActual"
+                       type="number"
+                       min="0"
+                       step="0.001"
+                       th:field="*{stockActual}">
+
+                <div class="error"
+                     th:if="${#fields.hasErrors('stockActual')}"
+                     th:errors="*{stockActual}">
+                </div>
+            </div>
+
+            <div class="campo">
+                <label for="stockMinimo">Stock mínimo</label>
+
+                <input id="stockMinimo"
+                       type="number"
+                       min="0"
+                       step="0.001"
+                       th:field="*{stockMinimo}">
+
+                <div class="error"
+                     th:if="${#fields.hasErrors('stockMinimo')}"
+                     th:errors="*{stockMinimo}">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="campo">
+            <label for="unidadMedida">Unidad de medida</label>
+
+            <select id="unidadMedida"
+                    th:field="*{unidadMedida}">
+
+                <option value="">
+                    Seleccione una unidad
+                </option>
+
+                <option th:each="unidad : ${unidadesMedida}"
+                        th:value="${unidad}"
+                        th:text="${unidad}">
+                </option>
+
+            </select>
+
+            <div class="error"
+                 th:if="${#fields.hasErrors('unidadMedida')}"
+                 th:errors="*{unidadMedida}">
+            </div>
+        </div>
+
+        <div class="acciones">
+            <a class="volver"
+               th:href="@{/}">
+                Inicio
+            </a>
+
+            <button type="submit"
+                    th:text="${producto.id == null}
+            ? 'Guardar producto'
+            : 'Actualizar producto'">
+            </button>
+
+            <a class="volver"
+               th:href="@{/productos}">
+                Volver
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>

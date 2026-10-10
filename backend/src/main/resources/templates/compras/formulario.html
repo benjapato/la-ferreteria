@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Nueva compra | La Ferretería</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 40px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .contenedor {
+            max-width: 1150px;
+            margin: auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .campo {
+            margin-top: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        select,
+        input,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+            font-size: 15px;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .error-general {
+            margin-bottom: 20px;
+            padding: 12px;
+            border-radius: 5px;
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .tabla-contenedor {
+            overflow: visible;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th:nth-child(1),
+        td:nth-child(1) {
+            width: 52%;
+        }
+
+        th:nth-child(2),
+        td:nth-child(2) {
+            width: 17%;
+        }
+
+        th:nth-child(3),
+        td:nth-child(3) {
+            width: 21%;
+        }
+
+        th:nth-child(4),
+        td:nth-child(4) {
+            width: 10%;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+        }
+
+        /*
+         * Autocompletado de productos.
+         */
+        .producto-autocomplete {
+            position: relative;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .producto-busqueda {
+            background-color: white;
+        }
+
+        .producto-busqueda:focus {
+            border-color: #2563eb;
+            outline: 2px solid rgba(37, 99, 235, 0.15);
+        }
+
+        .resultados-productos {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: none;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            background-color: white;
+            box-shadow: 0 5px 14px rgba(0, 0, 0, 0.15);
+        }
+
+        .fila-detalle {
+            position: relative;
+        }
+
+        .fila-detalle:focus-within {
+            z-index: 50;
+        }
+
+        tbody,
+        tr,
+        td {
+            overflow: visible;
+        }
+
+        .resultado-producto {
+            display: block;
+            width: 100%;
+            padding: 11px 13px;
+            border: none;
+            border-bottom: 1px solid #eee;
+            background-color: white;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .resultado-producto:last-child {
+            border-bottom: none;
+        }
+
+        .resultado-producto:hover {
+            background-color: #eff6ff;
+        }
+
+        .resultado-nombre {
+            display: block;
+            color: #111;
+            font-weight: bold;
+        }
+
+        .resultado-datos {
+            display: block;
+            margin-top: 4px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .sin-resultados {
+            padding: 14px;
+            color: #666;
+            text-align: center;
+        }
+
+        .producto-seleccionado {
+            display: none;
+            margin-top: 7px;
+            padding: 8px 10px;
+            border-radius: 5px;
+            background-color: #d1e7dd;
+            color: #0f5132;
+            font-size: 13px;
+        }
+
+        .boton-agregar {
+            margin-top: 15px;
+            padding: 9px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #dbeafe;
+            color: #1e3a8a;
+            cursor: pointer;
+        }
+
+        .boton-agregar:hover {
+            background-color: #bfdbfe;
+        }
+
+        .boton-eliminar {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #f3c5c5;
+            color: #8b0000;
+            cursor: pointer;
+        }
+
+        .boton-eliminar:hover {
+            background-color: #e8aaaa;
+        }
+
+        .acciones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .guardar,
+        .volver {
+            display: inline-block;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .guardar {
+            background-color: #333;
+            color: white;
+        }
+
+        .volver {
+            background-color: #ddd;
+            color: #333;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 15px;
+            }
+
+            .contenedor {
+                padding: 20px;
+            }
+
+            .producto-autocomplete {
+                min-width: 280px;
+            }
+        }
+        /* Alinea todos los campos al comienzo de cada fila */
+        #detalles-body .fila-detalle > td {
+            vertical-align: top !important;
+        }
+
+        /* Misma altura para buscador y cantidad */
+        #detalles-body .producto-busqueda,
+        #detalles-body .cantidad-input {
+            height: 40px;
+            margin: 0;
+        }
+
+        /* Alinea el botón Quitar con los campos */
+        #detalles-body .boton-eliminar {
+            height: 40px;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        /* El cartel verde queda debajo sin mover los otros campos */
+        #detalles-body .producto-seleccionado {
+            margin-top: 7px;
+        }
+
+        /* Permite que la lista aparezca fuera de la tabla */
+        .tabla-contenedor,
+        #detalles-body,
+        #detalles-body tr,
+        #detalles-body td {
+            overflow: visible;
+        }
+
+        /* Buscador de proveedores */
+
+        .proveedor-autocomplete {
+            position: relative;
+            width: 100%;
+        }
+
+        .proveedor-busqueda {
+            width: 100%;
+            background-color: white;
+        }
+
+        .proveedor-busqueda:focus {
+            border-color: #2563eb;
+            outline: 2px solid rgba(37, 99, 235, 0.15);
+        }
+
+        .resultados-proveedores {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            z-index: 1500;
+            display: none;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            background-color: white;
+            box-shadow: 0 5px 14px rgba(0, 0, 0, 0.15);
+        }
+
+        .resultado-proveedor {
+            display: block;
+            width: 100%;
+            padding: 12px 14px;
+            border: none;
+            border-bottom: 1px solid #eee;
+            background-color: white;
+            color: #111;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .resultado-proveedor:last-child {
+            border-bottom: none;
+        }
+
+        .resultado-proveedor:hover {
+            background-color: #eff6ff;
+        }
+
+        .resultado-proveedor-nombre {
+            display: block;
+            font-weight: bold;
+        }
+
+        .resultado-proveedor-datos {
+            display: block;
+            margin-top: 4px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .proveedor-seleccionado {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-top: 7px;
+            padding: 9px 11px;
+            border-radius: 5px;
+            background-color: #d1e7dd;
+            color: #0f5132;
+            font-size: 13px;
+        }
+
+        .quitar-proveedor {
+            flex-shrink: 0;
+            padding: 5px 9px;
+            border: none;
+            border-radius: 4px;
+            background-color: #f3c5c5;
+            color: #8b0000;
+            cursor: pointer;
+        }
+
+        .quitar-proveedor:hover {
+            background-color: #e8aaaa;
+        }
+
+        .sin-proveedores {
+            padding: 14px;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <h1>Nueva compra</h1>
+
+    <p>
+        La compra se guardará como pendiente.
+        El stock aumentará cuando sea confirmada.
+    </p>
+
+    <div th:if="${error}"
+         class="error-general"
+         th:text="${error}">
+    </div>
+
+    <form th:action="@{/compras/guardar}"
+          th:object="${compra}"
+          method="post"
+          onsubmit="return validarCompra()">
+
+        <div class="campo">
+
+            <label for="proveedorBusqueda">
+                Proveedor
+            </label>
+
+            <div class="proveedor-autocomplete">
+
+                <!-- Campo visible -->
+
+                <input id="proveedorBusqueda"
+                       type="text"
+                       class="proveedor-busqueda"
+                       placeholder="Buscar proveedor por nombre"
+                       autocomplete="off"
+                       oninput="buscarProveedores(this)"
+                       onfocus="mostrarProveedores(this)"
+                       onkeydown="manejarTeclaProveedor(event)">
+
+                <!-- Guarda el ID que recibe Spring -->
+
+                <input id="proveedor"
+                       type="hidden"
+                       th:field="*{proveedor.id}">
+
+                <!-- Lista de resultados -->
+
+                <div id="resultadosProveedores"
+                     class="resultados-proveedores">
+                </div>
+
+                <!-- Proveedor seleccionado -->
+
+                <div id="proveedorSeleccionado"
+                     class="proveedor-seleccionado">
+
+            <span id="proveedorResumen">
+            </span>
+
+                    <button type="button"
+                            class="quitar-proveedor"
+                            onclick="limpiarProveedor()">
+                        Quitar
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="campo">
+
+            <label for="observaciones">
+                Observaciones
+            </label>
+
+            <textarea id="observaciones"
+                      th:field="*{observaciones}"
+                      placeholder="Información opcional sobre la compra">
+            </textarea>
+
+        </div>
+
+        <h2>Productos comprados</h2>
+
+        <p>
+            Escribí el nombre o código y seleccioná el producto
+            directamente desde los resultados.
+        </p>
+
+        <div class="tabla-contenedor">
+
+            <table>
+
+                <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Costo unitario</th>
+                    <th>Acción</th>
+                </tr>
+                </thead>
+
+                <tbody id="detalles-body">
+
+                <tr th:each="detalle, estado : *{detalles}"
+                    class="fila-detalle">
+
+                    <td>
+
+                        <div class="producto-autocomplete">
+
+                            <input type="text"
+                                   class="producto-busqueda"
+                                   placeholder="Ejemplo: tornillo"
+                                   autocomplete="off"
+                                   oninput="buscarProductos(this)"
+                                   onfocus="mostrarProductos(this)"
+                                   onkeydown="manejarTeclaBuscador(event, this)">
+
+                            <!-- Este campo guarda el ID real -->
+
+                            <input type="hidden"
+                                   class="producto-id"
+                                   th:field="*{detalles[__${estado.index}__].producto.id}">
+
+                            <div class="resultados-productos">
+                            </div>
+
+                            <div class="producto-seleccionado">
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                    <td>
+
+                        <input class="cantidad-input"
+                               type="number"
+                               min="0.001"
+                               step="0.001"
+                               th:field="*{detalles[__${estado.index}__].cantidad}"
+                               placeholder="Cantidad"
+                               required>
+
+                    </td>
+
+                    <td>
+
+                        <input class="costo-input"
+                               type="number"
+                               min="0.01"
+                               step="0.01"
+                               th:field="*{detalles[__${estado.index}__].costoUnitario}"
+                               placeholder="Costo"
+                               required>
+
+                    </td>
+
+                    <td>
+
+                        <button type="button"
+                                class="boton-eliminar"
+                                onclick="eliminarFila(this)">
+                            Quitar
+                        </button>
+
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <button type="button"
+                class="boton-agregar"
+                onclick="agregarFila()">
+            Agregar otro producto
+        </button>
+
+        <div class="acciones">
+            <a class="volver"
+               th:href="@{/}">
+                Inicio
+            </a>
+
+            <button type="submit"
+                    class="guardar">
+                Registrar compra
+            </button>
+
+            <a class="volver"
+               th:href="@{/compras}">
+                Volver
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+<!-- Proveedores disponibles para el autocompletado -->
+
+<div id="catalogo-proveedores"
+     hidden>
+
+    <div th:each="proveedorItem : ${proveedores}"
+         class="proveedor-catalogo"
+         th:attr="
+            data-id=${proveedorItem.id},
+            data-nombre=${proveedorItem.nombre}">
+    </div>
+
+</div>
+
+<!-- Catálogo de productos utilizado por JavaScript -->
+
+<div id="catalogo-productos"
+     hidden>
+
+    <div th:each="producto : ${productos}"
+         class="producto-catalogo"
+         th:attr="
+            data-id=${producto.id},
+            data-codigo=${producto.codigo},
+            data-nombre=${producto.nombre}">
+    </div>
+
+</div>
+
+<!-- Plantilla para filas nuevas -->
+
+<template id="plantilla-fila">
+
+    <tr class="fila-detalle">
+
+        <td>
+
+            <div class="producto-autocomplete">
+
+                <input type="text"
+                       class="producto-busqueda"
+                       placeholder="Ejemplo: tornillo"
+                       autocomplete="off"
+                       oninput="buscarProductos(this)"
+                       onfocus="mostrarProductos(this)"
+                       onkeydown="manejarTeclaBuscador(event, this)">
+
+                <input type="hidden"
+                       class="producto-id">
+
+                <div class="resultados-productos">
+                </div>
+
+                <div class="producto-seleccionado">
+                </div>
+
+            </div>
+
+        </td>
+
+        <td>
+
+            <input class="cantidad-input"
+                   type="number"
+                   min="0.001"
+                   step="0.001"
+                   placeholder="Cantidad"
+                   required>
+
+        </td>
+
+        <td>
+
+            <input class="costo-input"
+                   type="number"
+                   min="0.01"
+                   step="0.01"
+                   placeholder="Costo"
+                   required>
+
+        </td>
+
+        <td>
+
+            <button type="button"
+                    class="boton-eliminar"
+                    onclick="eliminarFila(this)">
+                Quitar
+            </button>
+
+        </td>
+
+    </tr>
+
+</template>
+
+<script>
+    let catalogoProductos = [];
+
+    const proveedorId =
+        document.getElementById("proveedor");
+
+    const proveedorBusqueda =
+        document.getElementById("proveedorBusqueda");
+
+    const resultadosProveedores =
+        document.getElementById("resultadosProveedores");
+
+    const proveedorSeleccionado =
+        document.getElementById("proveedorSeleccionado");
+
+    const proveedorResumen =
+        document.getElementById("proveedorResumen");
+
+    let catalogoProveedores = [];
+
+    function cargarCatalogoProveedores() {
+
+        catalogoProveedores = Array.from(
+            document.querySelectorAll(
+                ".proveedor-catalogo"
+            )
+        ).map(elemento => ({
+
+            id: elemento.dataset.id,
+
+            nombre:
+                elemento.dataset.nombre || ""
+        }));
+    }
+
+    function buscarProveedores(input) {
+
+        /*
+         * Al escribir nuevamente se elimina
+         * la selección anterior.
+         */
+        proveedorId.value = "";
+
+        proveedorSeleccionado.style.display =
+            "none";
+
+        proveedorResumen.textContent = "";
+
+        mostrarCoincidenciasProveedores(
+            input.value
+        );
+    }
+
+    function mostrarProveedores(input) {
+
+        mostrarCoincidenciasProveedores(
+            input.value
+        );
+    }
+
+    function mostrarCoincidenciasProveedores(
+        textoIngresado
+    ) {
+
+        const texto =
+            normalizarTexto(textoIngresado);
+
+        const coincidencias =
+            catalogoProveedores
+                .filter(proveedorItem => {
+
+                    const nombreNormalizado =
+                        normalizarTexto(
+                            proveedorItem.nombre
+                        );
+
+                    return nombreNormalizado.includes(
+                        texto
+                    );
+                })
+                .slice(0, 10);
+
+        resultadosProveedores.innerHTML = "";
+
+        if (coincidencias.length === 0) {
+
+            const mensaje =
+                document.createElement("div");
+
+            mensaje.className =
+                "sin-proveedores";
+
+            mensaje.textContent =
+                "No se encontraron proveedores";
+
+            resultadosProveedores.appendChild(
+                mensaje
+            );
+
+            resultadosProveedores.style.display =
+                "block";
+
+            return;
+        }
+
+        coincidencias.forEach(
+            proveedorItem => {
+
+                const boton =
+                    document.createElement("button");
+
+                boton.type = "button";
+
+                boton.className =
+                    "resultado-proveedor";
+
+                const nombre =
+                    document.createElement("span");
+
+                nombre.className =
+                    "resultado-proveedor-nombre";
+
+                nombre.textContent =
+                    proveedorItem.nombre;
+
+                const datos =
+                    document.createElement("span");
+
+                datos.className =
+                    "resultado-proveedor-datos";
+
+                datos.textContent =
+                    "Seleccionar este proveedor";
+
+                boton.appendChild(nombre);
+                boton.appendChild(datos);
+
+                boton.addEventListener(
+                    "click",
+                    function () {
+
+                        seleccionarProveedor(
+                            proveedorItem
+                        );
+                    }
+                );
+
+                resultadosProveedores.appendChild(
+                    boton
+                );
+            }
+        );
+
+        resultadosProveedores.style.display =
+            "block";
+    }
+
+    function seleccionarProveedor(
+        proveedorItem
+    ) {
+
+        /*
+         * Guardamos el ID real que se enviará
+         * al controlador.
+         */
+        proveedorId.value =
+            proveedorItem.id;
+
+        proveedorBusqueda.value =
+            proveedorItem.nombre;
+
+        proveedorResumen.textContent =
+            "Proveedor seleccionado: "
+            + proveedorItem.nombre;
+
+        proveedorSeleccionado.style.display =
+            "flex";
+
+        resultadosProveedores.style.display =
+            "none";
+    }
+
+    function limpiarProveedor() {
+
+        proveedorId.value = "";
+
+        proveedorBusqueda.value = "";
+
+        proveedorResumen.textContent = "";
+
+        proveedorSeleccionado.style.display =
+            "none";
+
+        resultadosProveedores.style.display =
+            "none";
+
+        proveedorBusqueda.focus({
+            preventScroll: true
+        });
+    }
+
+    function inicializarProveedorSeleccionado() {
+
+        if (!proveedorId.value) {
+            return;
+        }
+
+        const proveedorEncontrado =
+            catalogoProveedores.find(
+                proveedorItem =>
+                    String(proveedorItem.id)
+                    === String(
+                        proveedorId.value
+                    )
+            );
+
+        if (!proveedorEncontrado) {
+            return;
+        }
+
+        seleccionarProveedor(
+            proveedorEncontrado
+        );
+    }
+
+    function manejarTeclaProveedor(evento) {
+
+        if (evento.key === "Escape") {
+
+            resultadosProveedores.style.display =
+                "none";
+        }
+    }
+
+    function cargarCatalogoProductos() {
+        catalogoProductos = Array.from(
+            document.querySelectorAll(".producto-catalogo")
+        ).map(elemento => ({
+            id: elemento.dataset.id,
+            codigo: elemento.dataset.codigo || "",
+            nombre: elemento.dataset.nombre || ""
+        }));
+    }
+
+    function agregarFila() {
+        const plantilla =
+            document.getElementById("plantilla-fila");
+
+        const cuerpo =
+            document.getElementById("detalles-body");
+
+        const nuevaFila =
+            plantilla.content.cloneNode(true);
+
+        cuerpo.appendChild(nuevaFila);
+
+        reindexarFilas();
+
+        const filas =
+            document.querySelectorAll(".fila-detalle");
+
+        const ultimaFila =
+            filas[filas.length - 1];
+
+        const buscador =
+            ultimaFila.querySelector(".producto-busqueda");
+
+        /*
+         * Esperamos a que el navegador dibuje la nueva fila
+         * y después bajamos suavemente hasta ella.
+         */
+        requestAnimationFrame(() => {
+
+            ultimaFila.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+
+            /*
+             * Colocamos el cursor en el buscador sin provocar
+             * un segundo desplazamiento de pantalla.
+             */
+            setTimeout(() => {
+                buscador.focus({
+                    preventScroll: true
+                });
+            }, 350);
+        });
+    }
+
+    function eliminarFila(boton) {
+        const filas =
+            document.querySelectorAll(".fila-detalle");
+
+        if (filas.length === 1) {
+            alert(
+                "La compra debe tener al menos un producto."
+            );
+
+            return;
+        }
+
+        boton.closest(".fila-detalle").remove();
+
+        reindexarFilas();
+    }
+
+    function reindexarFilas() {
+        const filas =
+            document.querySelectorAll(".fila-detalle");
+
+        filas.forEach((fila, indice) => {
+            const productoId =
+                fila.querySelector(".producto-id");
+
+            const cantidad =
+                fila.querySelector(".cantidad-input");
+
+            const costo =
+                fila.querySelector(".costo-input");
+
+            productoId.name =
+                `detalles[${indice}].producto.id`;
+
+            cantidad.name =
+                `detalles[${indice}].cantidad`;
+
+            costo.name =
+                `detalles[${indice}].costoUnitario`;
+        });
+    }
+
+    function buscarProductos(input) {
+        const contenedor =
+            input.closest(".producto-autocomplete");
+
+        /*
+         * Al modificar el texto se limpia la selección
+         * anterior. Es obligatorio elegir un resultado.
+         */
+        contenedor.querySelector(".producto-id").value = "";
+
+        const seleccionado =
+            contenedor.querySelector(".producto-seleccionado");
+
+        seleccionado.style.display = "none";
+        seleccionado.textContent = "";
+
+        mostrarCoincidencias(input);
+    }
+
+    function mostrarProductos(input) {
+        mostrarCoincidencias(input);
+    }
+
+    function mostrarCoincidencias(input) {
+        const contenedor =
+            input.closest(".producto-autocomplete");
+
+        const resultados =
+            contenedor.querySelector(".resultados-productos");
+
+        const texto =
+            normalizarTexto(input.value);
+
+        const coincidencias =
+            catalogoProductos
+                .filter(producto => {
+                    const datos =
+                        normalizarTexto(
+                            producto.codigo
+                            + " "
+                            + producto.nombre
+                        );
+
+                    return datos.includes(texto);
+                })
+                .slice(0, 12);
+
+        resultados.innerHTML = "";
+
+        if (coincidencias.length === 0) {
+            const mensaje =
+                document.createElement("div");
+
+            mensaje.className = "sin-resultados";
+            mensaje.textContent =
+                "No se encontraron productos";
+
+            resultados.appendChild(mensaje);
+            resultados.style.display = "block";
+
+            return;
+        }
+
+        coincidencias.forEach(producto => {
+            const boton =
+                document.createElement("button");
+
+            boton.type = "button";
+            boton.className = "resultado-producto";
+
+            const nombre =
+                document.createElement("span");
+
+            nombre.className = "resultado-nombre";
+            nombre.textContent = producto.nombre;
+
+            const datos =
+                document.createElement("span");
+
+            datos.className = "resultado-datos";
+            datos.textContent =
+                "Código: " + producto.codigo;
+
+            boton.appendChild(nombre);
+            boton.appendChild(datos);
+
+            boton.addEventListener(
+                "click",
+                function () {
+                    seleccionarProducto(
+                        input,
+                        producto
+                    );
+                }
+            );
+
+            resultados.appendChild(boton);
+        });
+
+        resultados.style.display = "block";
+    }
+
+    function seleccionarProducto(
+        input,
+        producto
+    ) {
+        const contenedor =
+            input.closest(".producto-autocomplete");
+
+        const productoId =
+            contenedor.querySelector(".producto-id");
+
+        const resultados =
+            contenedor.querySelector(".resultados-productos");
+
+        const seleccionado =
+            contenedor.querySelector(".producto-seleccionado");
+
+        productoId.value = producto.id;
+
+        input.value =
+            producto.codigo
+            + " - "
+            + producto.nombre;
+
+        seleccionado.textContent =
+            "Producto seleccionado: "
+            + producto.codigo
+            + " - "
+            + producto.nombre;
+
+        seleccionado.style.display = "block";
+        resultados.style.display = "none";
+    }
+
+    function inicializarProductosSeleccionados() {
+        document
+            .querySelectorAll(".producto-autocomplete")
+            .forEach(contenedor => {
+                const productoId =
+                    contenedor.querySelector(".producto-id");
+
+                if (!productoId.value) {
+                    return;
+                }
+
+                const producto =
+                    catalogoProductos.find(
+                        item =>
+                            String(item.id)
+                            === String(productoId.value)
+                    );
+
+                if (!producto) {
+                    return;
+                }
+
+                const input =
+                    contenedor.querySelector(
+                        ".producto-busqueda"
+                    );
+
+                seleccionarProducto(
+                    input,
+                    producto
+                );
+            });
+    }
+
+    function manejarTeclaBuscador(
+        evento,
+        input
+    ) {
+        if (evento.key === "Escape") {
+            const contenedor =
+                input.closest(".producto-autocomplete");
+
+            contenedor
+                .querySelector(".resultados-productos")
+                .style.display = "none";
+        }
+    }
+
+    function validarCompra() {
+
+        if (!proveedorId.value) {
+
+            alert(
+                "Debe buscar y seleccionar un proveedor."
+            );
+
+            proveedorBusqueda.focus();
+
+            return false;
+        }
+        const filas =
+            document.querySelectorAll(".fila-detalle");
+
+        for (const fila of filas) {
+            const productoId =
+                fila.querySelector(".producto-id");
+
+            if (!productoId.value) {
+                alert(
+                    "Debe buscar y seleccionar un producto en cada fila."
+                );
+
+                fila
+                    .querySelector(".producto-busqueda")
+                    .focus();
+
+                return false;
+            }
+        }
+
+        return confirm(
+            "¿Registrar esta compra como pendiente?"
+        );
+    }
+
+    function normalizarTexto(texto) {
+        return String(texto || "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .trim();
+    }
+
+    document.addEventListener(
+        "click",
+        function (evento) {
+
+            /*
+             * Cerrar los resultados de productos.
+             */
+            if (
+                !evento.target.closest(
+                    ".producto-autocomplete"
+                )
+            ) {
+
+                document
+                    .querySelectorAll(
+                        ".resultados-productos"
+                    )
+                    .forEach(resultados => {
+
+                        resultados.style.display =
+                            "none";
+                    });
+            }
+
+            /*
+             * Cerrar los resultados de proveedores.
+             */
+            if (
+                !evento.target.closest(
+                    ".proveedor-autocomplete"
+                )
+            ) {
+
+                resultadosProveedores.style.display =
+                    "none";
+            }
+        }
+    );
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            cargarCatalogoProveedores();
+            cargarCatalogoProductos();
+
+            reindexarFilas();
+
+            inicializarProveedorSeleccionado();
+            inicializarProductosSeleccionados();
+        }
+    );
+</script>
+
+</body>
+</html>

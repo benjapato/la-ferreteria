@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:fragment="estilos">
+        <link rel="stylesheet"
+              th:href="@{/css/navegacion.css}">
+    </th:block>
+</head>
+
+<body>
+<th:block th:fragment="estructura">
+    <header class="app-barra-superior">
+        <a class="app-marca"
+           th:href="@{/}"
+           aria-label="Ir al inicio">
+            <span class="app-marca-sello"
+                  aria-hidden="true">LF</span>
+            <span class="app-marca-texto">
+                <strong>La Ferretería</strong>
+                <small>Panel de trabajo</small>
+            </span>
+        </a>
+
+        <div class="app-usuario-superior">
+            <div class="app-datos-usuario">
+                <strong th:text="${nombreUsuarioActual}">
+                    Usuario
+                </strong>
+                <span th:text="${rolUsuarioActual}">
+                    Rol
+                </span>
+            </div>
+
+            <form class="app-cerrar-sesion-form"
+                  th:action="@{/logout}"
+                  method="post">
+                <button type="submit"
+                        class="app-cerrar-sesion">
+                    Cerrar sesión
+                </button>
+            </form>
+        </div>
+    </header>
+
+    <div id="appPanelSuperposicion"
+         class="app-panel-superposicion"
+         aria-hidden="true">
+    </div>
+
+    <aside id="appPanelNavegacion"
+           class="app-panel-lateral"
+           tabindex="0"
+           aria-expanded="false"
+           aria-label="Panel de navegación">
+        <div class="app-panel-cabecera">
+            <div>
+                <span>La Ferretería</span>
+                <h2 th:text="${esAdministrador
+                    ? 'Administración'
+                    : 'Ventas'}">
+                    Navegación
+                </h2>
+            </div>
+        </div>
+
+        <nav class="app-navegacion-lateral"
+             aria-label="Navegación principal">
+            <span class="app-grupo-panel">General</span>
+            <a th:href="@{/}"
+               data-ruta-exacta="/">Inicio</a>
+            <a th:href="@{/ventas/nueva}"
+               data-ruta-exacta="/ventas/nueva">Vender</a>
+            <a th:href="@{/ventas}"
+               data-ruta="/ventas">Historial de ventas</a>
+
+            <span class="app-grupo-panel">Gestión</span>
+            <a th:href="@{/productos}"
+               data-ruta="/productos">Productos</a>
+            <a th:href="@{/clientes}"
+               data-ruta="/clientes">Clientes</a>
+
+            <th:block th:if="${esAdministrador}">
+                <a th:href="@{/categorias}"
+                   data-ruta="/categorias">Categorías</a>
+                <a th:href="@{/proveedores}"
+                   data-ruta="/proveedores">Proveedores</a>
+
+                <span class="app-grupo-panel">Operación</span>
+                <a th:href="@{/caja}"
+                   data-ruta="/caja">Caja</a>
+
+                <span class="app-grupo-panel">
+                    Compras y mercadería
+                </span>
+                <a th:href="@{/compras/nueva}"
+                   data-ruta-exacta="/compras/nueva">
+                    Nueva compra
+                </a>
+                <a th:href="@{/compras}"
+                   data-ruta="/compras">
+                    Historial de compras
+                </a>
+                <a th:href="@{/movimientos-stock}"
+                   data-ruta="/movimientos-stock">
+                    Movimientos de stock
+                </a>
+                <a th:href="@{/productos/stock-bajo}"
+                   data-ruta-exacta="/productos/stock-bajo">
+                    Stock bajo
+                </a>
+
+                <span class="app-grupo-panel">Reportes</span>
+                <a th:href="@{/reportes/ventas}"
+                   data-ruta="/reportes/ventas">
+                    Reporte de ventas
+                </a>
+                <a th:href="@{/reportes/productos}"
+                   data-ruta="/reportes/productos">
+                    Productos más vendidos
+                </a>
+                <a th:href="@{/reportes/caja}"
+                   data-ruta="/reportes/caja">
+                    Reporte de caja
+                </a>
+
+                <span class="app-grupo-panel">Sistema</span>
+                <a th:href="@{/usuarios}"
+                   data-ruta="/usuarios">Usuarios</a>
+                <a th:href="@{/copias-seguridad}"
+                   data-ruta="/copias-seguridad">
+                    Copias de seguridad
+                </a>
+            </th:block>
+        </nav>
+    </aside>
+
+    <script th:src="@{/js/navegacion.js}" defer></script>
+</th:block>
+</body>
+</html>

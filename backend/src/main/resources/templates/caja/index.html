@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Caja | La Ferretería</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 40px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .contenedor {
+            max-width: 1300px;
+            margin: auto;
+            padding: 30px;
+            border-radius: 10px;
+            background-color: white;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .mensaje,
+        .error {
+            margin-top: 20px;
+            padding: 13px;
+            border-radius: 5px;
+        }
+
+        .mensaje {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .sin-caja {
+            margin-top: 25px;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            background-color: #fff3cd;
+            color: #664d03;
+        }
+
+        .caja-abierta {
+            margin-top: 25px;
+            padding: 25px;
+            border-radius: 8px;
+            background-color: #d1e7dd;
+        }
+
+        .encabezado-caja {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .estado-abierta {
+            font-size: 20px;
+            font-weight: bold;
+            color: #0f5132;
+        }
+
+        .totales {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .formulario-linea {
+            display: flex;
+            align-items: end;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .campo {
+            display: grid;
+            gap: 6px;
+            min-width: 180px;
+            text-align: left;
+        }
+
+        .campo-amplio {
+            flex: 1 1 280px;
+        }
+
+        label {
+            color: #4b5563;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            width: 100%;
+            min-height: 42px;
+            padding: 9px 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 5px;
+            background: white;
+            color: #1f2937;
+            font: inherit;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #166534;
+            outline: 2px solid #bbf7d0;
+            outline-offset: 1px;
+        }
+
+        .acciones-efectivo {
+            margin-top: 22px;
+            padding-top: 20px;
+            border-top: 1px solid #b7d9c4;
+        }
+
+        .acciones-efectivo h3,
+        .movimientos h3 {
+            margin: 0 0 14px;
+        }
+
+        .movimientos {
+            margin-top: 24px;
+        }
+
+        .ingreso,
+        .diferencia-positiva {
+            color: #166534;
+            font-weight: bold;
+        }
+
+        .retiro,
+        .diferencia-negativa {
+            color: #b91c1c;
+            font-weight: bold;
+        }
+
+        .tarjeta {
+            padding: 18px;
+            border-radius: 7px;
+            background-color: white;
+        }
+
+        .tarjeta strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .valor {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .total-general {
+            color: #166534;
+        }
+
+        .boton {
+            display: inline-block;
+            padding: 10px 17px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .abrir {
+            background-color: #166534;
+            color: white;
+        }
+
+        .cerrar {
+            background-color: #b91c1c;
+            color: white;
+        }
+
+        .volver {
+            margin-top: 25px;
+            background-color: #ddd;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 25px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+        }
+
+        .tabla-contenedor {
+            overflow-x: auto;
+        }
+
+        .estado {
+            font-weight: bold;
+        }
+
+        .abierta {
+            color: green;
+        }
+
+        .cerrada {
+            color: #555;
+        }
+
+        .ver {
+            padding: 6px 10px;
+            border-radius: 5px;
+            background-color: #dbeafe;
+            color: #1e3a8a;
+            text-decoration: none;
+        }
+
+        .sin-datos {
+            padding: 25px;
+            text-align: center;
+            color: #666;
+        }
+
+        @media (max-width: 800px) {
+            body {
+                padding: 15px;
+            }
+
+            .contenedor {
+                padding: 20px;
+            }
+
+            .totales {
+                grid-template-columns: 1fr;
+            }
+
+            .encabezado-caja {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .formulario-linea,
+            .campo {
+                width: 100%;
+            }
+        }
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <h1>Caja</h1>
+
+    <p>
+        Resumen de ventas y pagos recibidos.
+    </p>
+
+    <div th:if="${mensaje}"
+         class="mensaje"
+         th:text="${mensaje}">
+    </div>
+
+    <div th:if="${error}"
+         class="error"
+         th:text="${error}">
+    </div>
+
+    <div th:if="${cajaAbierta == null}"
+         class="sin-caja">
+
+        <h2>No hay una caja abierta</h2>
+
+        <form class="formulario-linea"
+              th:action="@{/caja/abrir}"
+              method="post">
+            <div class="campo">
+                <label for="montoInicial">Efectivo inicial</label>
+                <input id="montoInicial"
+                       name="montoInicial"
+                       type="number"
+                       min="0"
+                       step="0.01"
+                       value="0.00"
+                       required>
+            </div>
+
+            <button type="submit"
+                    class="boton abrir">
+                Abrir caja
+            </button>
+        </form>
+
+    </div>
+
+    <!-- Existe una caja abierta -->
+
+    <div th:if="${cajaAbierta != null}"
+         class="caja-abierta">
+
+        <div class="encabezado-caja">
+
+            <div>
+                <div class="estado-abierta">
+                    Caja abierta
+                </div>
+
+                <p>
+                    Número:
+                    <strong th:text="${cajaAbierta.id}">
+                    </strong>
+                </p>
+
+                <p>
+                    Apertura:
+                    <strong th:text="${#temporals.format(
+                            cajaAbierta.fechaApertura,
+                            'dd/MM/yyyy HH:mm'
+                        )}">
+                    </strong>
+                </p>
+
+                <p>
+                    Abierta por:
+                    <strong th:text="${cajaAbierta.usuarioApertura == null
+                            ? 'Sin registrar'
+                            : cajaAbierta.usuarioApertura.nombreCompleto}">
+                    </strong>
+                </p>
+            </div>
+
+            <form class="formulario-linea"
+                  th:action="@{/caja/cerrar}"
+                  method="post">
+
+                <div class="campo">
+                    <label for="efectivoContado">Efectivo contado</label>
+                    <input id="efectivoContado"
+                           name="efectivoContado"
+                           type="number"
+                           min="0"
+                           step="0.01"
+                           required>
+                </div>
+
+                <button type="submit"
+                        class="boton cerrar"
+                        onclick="return confirm(
+                            '¿Cerrar la caja actual?'
+                        )">
+                    Cerrar caja
+                </button>
+
+            </form>
+
+        </div>
+
+        <div class="totales">
+
+            <div class="tarjeta">
+                <strong>Total de ventas</strong>
+
+                <span class="valor">
+                    $
+                    <span th:text="${cajaAbierta.totalVentas}">
+                    </span>
+                </span>
+            </div>
+
+            <div class="tarjeta">
+                <strong>Pagos de clientes</strong>
+
+                <span class="valor">
+                    $
+                    <span th:text="${cajaAbierta.totalPagosClientes}">
+                    </span>
+                </span>
+            </div>
+
+            <div class="tarjeta">
+                <strong>Total general</strong>
+
+                <span class="valor total-general">
+                    $
+                    <span th:text="${cajaAbierta.totalGeneral}">
+                    </span>
+                </span>
+            </div>
+
+            <div class="tarjeta">
+                <strong>Efectivo inicial</strong>
+                <span class="valor">
+                    $ <span th:text="${#numbers.formatDecimal(
+                        cajaAbierta.montoInicial == null
+                            ? 0 : cajaAbierta.montoInicial,
+                        1, 'POINT', 2, 'COMMA'
+                    )}"></span>
+                </span>
+            </div>
+
+            <div class="tarjeta">
+                <strong>Ingresos manuales</strong>
+                <span class="valor ingreso">
+                    $ <span th:text="${#numbers.formatDecimal(
+                        cajaAbierta.ingresosEfectivo == null
+                            ? 0 : cajaAbierta.ingresosEfectivo,
+                        1, 'POINT', 2, 'COMMA'
+                    )}"></span>
+                </span>
+            </div>
+
+            <div class="tarjeta">
+                <strong>Retiros</strong>
+                <span class="valor retiro">
+                    $ <span th:text="${#numbers.formatDecimal(
+                        cajaAbierta.retirosEfectivo == null
+                            ? 0 : cajaAbierta.retirosEfectivo,
+                        1, 'POINT', 2, 'COMMA'
+                    )}"></span>
+                </span>
+            </div>
+
+            <div class="tarjeta">
+                <strong>Efectivo esperado</strong>
+                <span class="valor total-general">
+                    $ <span th:text="${#numbers.formatDecimal(
+                        cajaAbierta.efectivoEsperado == null
+                            ? 0 : cajaAbierta.efectivoEsperado,
+                        1, 'POINT', 2, 'COMMA'
+                    )}"></span>
+                </span>
+            </div>
+
+        </div>
+
+        <section class="acciones-efectivo">
+            <h3>Movimiento de efectivo</h3>
+
+            <form class="formulario-linea"
+                  th:action="@{/caja/movimiento}"
+                  method="post">
+                <div class="campo">
+                    <label for="tipoMovimiento">Tipo</label>
+                    <select id="tipoMovimiento"
+                            name="tipo"
+                            required>
+                        <option value="INGRESO">Ingreso</option>
+                        <option value="RETIRO">Retiro</option>
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label for="montoMovimiento">Monto</label>
+                    <input id="montoMovimiento"
+                           name="monto"
+                           type="number"
+                           min="0.01"
+                           step="0.01"
+                           required>
+                </div>
+
+                <div class="campo campo-amplio">
+                    <label for="motivoMovimiento">Motivo (opcional)</label>
+                    <input id="motivoMovimiento"
+                           name="motivo"
+                           type="text"
+                           maxlength="200">
+                </div>
+
+                <button type="submit"
+                        class="boton abrir">
+                    Registrar
+                </button>
+            </form>
+        </section>
+
+        <section class="movimientos">
+            <h3>Movimientos de la caja actual</h3>
+
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                        <th>Monto</th>
+                        <th>Motivo</th>
+                        <th>Usuario</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="movimiento : ${movimientosCaja}">
+                        <td th:text="${#temporals.format(
+                            movimiento.fecha, 'dd/MM/yyyy HH:mm'
+                        )}"></td>
+                        <td th:text="${movimiento.tipo}"
+                            th:class="${movimiento.tipo.name() == 'INGRESO'
+                                ? 'ingreso' : 'retiro'}"></td>
+                        <td th:text="${'$ ' + #numbers.formatDecimal(
+                            movimiento.monto, 1, 'POINT', 2, 'COMMA'
+                        )}"></td>
+                        <td th:text="${movimiento.motivo}"></td>
+                        <td th:text="${movimiento.usuario == null
+                            ? 'Sin registrar'
+                            : movimiento.usuario.nombreCompleto}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(movimientosCaja)}">
+                        <td colspan="5" class="sin-datos">
+                            No hay ingresos ni retiros manuales.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </div>
+
+    <h2>Historial de cajas</h2>
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+            <tr>
+                <th>Número</th>
+                <th>Apertura</th>
+                <th>Cierre</th>
+                <th>Abierta por</th>
+                <th>Cerrada por</th>
+                <th>Estado</th>
+                <th>Total ventas</th>
+                <th>Pagos de clientes</th>
+                <th>Total general</th>
+                <th>Efectivo esperado</th>
+                <th>Contado</th>
+                <th>Diferencia</th>
+                <th>Detalle</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="caja : ${cajas}">
+
+                <td th:text="${caja.id}">
+                </td>
+
+                <td th:text="${#temporals.format(
+                        caja.fechaApertura,
+                        'dd/MM/yyyy HH:mm'
+                    )}">
+                </td>
+
+                <td th:text="${caja.fechaCierre == null
+                        ? '-'
+                        : #temporals.format(
+                            caja.fechaCierre,
+                            'dd/MM/yyyy HH:mm'
+                        )}">
+                </td>
+
+                <td th:text="${caja.usuarioApertura == null
+                        ? 'Sin registrar'
+                        : caja.usuarioApertura.nombreCompleto}">
+                </td>
+
+                <td th:text="${caja.usuarioCierre == null
+                        ? '-'
+                        : caja.usuarioCierre.nombreCompleto}">
+                </td>
+
+                <td>
+                    <span class="estado"
+                          th:classappend="${caja.estado.name()
+                              == 'ABIERTA'
+                              ? ' abierta'
+                              : ' cerrada'}"
+                          th:text="${caja.estado}">
+                    </span>
+                </td>
+
+                <td>
+                    $
+                    <span th:text="${caja.totalVentas}">
+                    </span>
+                </td>
+
+                <td>
+                    $
+                    <span th:text="${caja.totalPagosClientes}">
+                    </span>
+                </td>
+
+                <td>
+                    $
+                    <strong th:text="${caja.totalGeneral}">
+                    </strong>
+                </td>
+
+                <td th:text="${'$ ' + #numbers.formatDecimal(
+                    caja.efectivoEsperado == null
+                        ? 0 : caja.efectivoEsperado,
+                    1, 'POINT', 2, 'COMMA'
+                )}"></td>
+
+                <td th:text="${caja.efectivoContado == null
+                    ? '-'
+                    : '$ ' + #numbers.formatDecimal(
+                        caja.efectivoContado,
+                        1, 'POINT', 2, 'COMMA'
+                    )}"></td>
+
+                <td th:text="${caja.diferenciaEfectivo == null
+                    ? '-'
+                    : '$ ' + #numbers.formatDecimal(
+                        caja.diferenciaEfectivo,
+                        1, 'POINT', 2, 'COMMA'
+                    )}"
+                    th:classappend="${caja.diferenciaEfectivo == null
+                        ? ''
+                        : caja.diferenciaEfectivo.signum() < 0
+                            ? ' diferencia-negativa'
+                            : caja.diferenciaEfectivo.signum() > 0
+                                ? ' diferencia-positiva' : ''}"></td>
+
+                <td>
+                    <a class="ver"
+                       th:href="@{/caja/detalle/{id}
+                                (id=${caja.id})}">
+                        Ver
+                    </a>
+                </td>
+
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(cajas)}">
+
+                <td colspan="13"
+                    class="sin-datos">
+                    Todavía no hay cajas registradas.
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <a class="boton volver"
+       th:href="@{/}">
+        Inicio
+    </a>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Detalle de compra | La Ferretería</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 40px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .contenedor {
+            max-width: 1200px;
+            margin: auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .informacion {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .dato {
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 6px;
+        }
+
+        .dato strong {
+            display: block;
+            margin-bottom: 7px;
+            color: #555;
+        }
+
+        .pendiente {
+            color: #b45309;
+            font-weight: bold;
+        }
+
+        .confirmada {
+            color: green;
+            font-weight: bold;
+        }
+
+        .cancelada {
+            color: red;
+            font-weight: bold;
+        }
+
+        .aviso {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 5px;
+        }
+
+        .aviso-pendiente {
+            background-color: #fff3cd;
+            color: #664d03;
+        }
+
+        .aviso-cancelada {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .tabla-contenedor {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 25px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+        }
+
+        tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .resumen {
+            max-width: 450px;
+            margin-top: 25px;
+            margin-left: auto;
+            border-top: 2px solid #333;
+        }
+
+        .linea-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 13px 7px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .total-principal {
+            font-size: 19px;
+            font-weight: bold;
+        }
+
+        .observaciones {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 6px;
+        }
+
+        .acciones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .acciones form {
+            margin: 0;
+        }
+
+        .boton {
+            display: inline-block;
+            padding: 10px 17px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ddd;
+            color: #333;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .confirmar {
+            background-color: #c8e6c9;
+            color: #176b1b;
+        }
+
+        .cancelar {
+            background-color: #f3c5c5;
+            color: #8b0000;
+        }
+
+        @media (max-width: 800px) {
+            body {
+                padding: 15px;
+            }
+
+            .contenedor {
+                padding: 20px;
+            }
+
+            .informacion {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <h1>
+        Compra #<span th:text="${compra.id}"></span>
+    </h1>
+
+    <div th:if="${compra.estado.name() == 'PENDIENTE'}"
+         class="aviso aviso-pendiente">
+        Esta compra está pendiente. El stock todavía no fue actualizado.
+    </div>
+
+    <div th:if="${compra.estado.name() == 'CANCELADA'}"
+         class="aviso aviso-cancelada">
+        Esta compra fue cancelada y no modificó el stock.
+    </div>
+
+    <div class="informacion">
+
+        <div class="dato">
+
+            <strong>Fecha</strong>
+
+            <span th:text="${#temporals.format(
+                    compra.fecha,
+                    'dd/MM/yyyy HH:mm'
+                )}">
+            </span>
+
+        </div>
+
+        <div class="dato">
+
+            <strong>Proveedor</strong>
+
+            <span th:text="${compra.proveedor.nombre}">
+            </span>
+
+        </div>
+
+        <div class="dato">
+
+            <strong>CUIT del proveedor</strong>
+
+            <span th:text="${#strings.isEmpty(compra.proveedor.cuit)
+                            ? '-'
+                            : compra.proveedor.cuit}">
+            </span>
+
+        </div>
+
+        <div class="dato">
+
+            <strong>Estado</strong>
+
+            <span th:if="${compra.estado.name() == 'PENDIENTE'}"
+                  class="pendiente">
+                Pendiente
+            </span>
+
+            <span th:if="${compra.estado.name() == 'CONFIRMADA'}"
+                  class="confirmada">
+                Confirmada
+            </span>
+
+            <span th:if="${compra.estado.name() == 'CANCELADA'}"
+                  class="cancelada">
+                Cancelada
+            </span>
+
+        </div>
+
+        <div class="dato">
+
+            <strong>Registrada por</strong>
+
+            <span th:text="${compra.usuario == null
+                    ? 'Sin registrar'
+                    : compra.usuario.nombreCompleto}">
+            </span>
+
+        </div>
+
+    </div>
+
+    <h2>Productos comprados</h2>
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+            <tr>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Costo unitario</th>
+                <th>Subtotal</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="detalle : ${compra.detalles}">
+
+                <td th:text="${detalle.producto.codigo}">
+                </td>
+
+                <td th:text="${detalle.producto.nombre}">
+                </td>
+
+                <td th:text="${detalle.cantidad
+                        .stripTrailingZeros()
+                        .toPlainString()}">
+                </td>
+
+                <td>
+                    $
+                    <span th:text="${detalle.costoUnitario}">
+                    </span>
+                </td>
+
+                <td>
+                    $
+                    <span th:text="${detalle.subtotal}">
+                    </span>
+                </td>
+
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(compra.detalles)}">
+
+                <td colspan="5">
+                    La compra no tiene productos.
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="resumen">
+
+        <div class="linea-total total-principal">
+
+            <span>Total de la compra</span>
+
+            <span>
+                $ <span th:text="${compra.total}"></span>
+            </span>
+
+        </div>
+
+    </div>
+
+    <div class="observaciones">
+
+        <strong>Observaciones:</strong>
+
+        <span th:text="${#strings.isEmpty(compra.observaciones)
+                        ? 'Sin observaciones'
+                        : compra.observaciones}">
+        </span>
+
+    </div>
+
+    <div class="acciones">
+        <a class="boton"
+           th:href="@{/}">
+            Inicio
+        </a>
+
+        <a class="boton"
+           th:href="@{/compras}">
+            Volver a compras
+        </a>
+
+        <a class="boton"
+           th:href="@{/movimientos-stock}">
+            Ver movimientos de stock
+        </a>
+
+        <form th:if="${compra.estado.name() == 'PENDIENTE'}"
+              th:action="@{/compras/confirmar/{id}(id=${compra.id})}"
+              method="post">
+
+            <button type="submit"
+                    class="boton confirmar"
+                    onclick="return confirm('¿Confirmar la compra y aumentar el stock?')">
+                Confirmar compra
+            </button>
+
+        </form>
+
+        <form th:if="${compra.estado.name() == 'PENDIENTE'}"
+              th:action="@{/compras/cancelar/{id}(id=${compra.id})}"
+              method="post">
+
+            <button type="submit"
+                    class="boton cancelar"
+                    onclick="return confirm('¿Cancelar esta compra?')">
+                Cancelar compra
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>

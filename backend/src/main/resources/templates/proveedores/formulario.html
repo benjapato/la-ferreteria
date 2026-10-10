@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Proveedor | La Ferretería</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .contenedor {
+            max-width: 800px;
+            margin: auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .fila {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .campo {
+            margin-top: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+        }
+
+        .acciones {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        button,
+        .volver {
+            display: inline-block;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        button {
+            background-color: #333;
+            color: white;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        .volver {
+            background-color: #ddd;
+            color: #333;
+        }
+
+        .volver:hover {
+            background-color: #c8c8c8;
+        }
+
+        .error {
+            color: #b00020;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .error-general {
+            background-color: #f8d7da;
+            color: #842029;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .aclaracion {
+            color: #666;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 15px;
+            }
+
+            .fila {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+        }
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <h1 th:text="${proveedor.id == null}
+            ? 'Nuevo proveedor'
+            : 'Editar proveedor'">
+    </h1>
+
+    <p>Ingresá los datos del proveedor.</p>
+
+    <div th:if="${error}"
+         class="error-general"
+         th:text="${error}">
+    </div>
+
+    <form th:action="@{/proveedores/guardar}"
+          th:object="${proveedor}"
+          method="post">
+
+        <input type="hidden"
+               th:field="*{id}">
+
+        <div class="fila">
+
+            <div class="campo">
+                <label for="nombre">Nombre</label>
+
+                <input id="nombre"
+                       type="text"
+                       th:field="*{nombre}"
+                       placeholder="Ejemplo: Distribuidora Andina">
+
+                <div class="error"
+                     th:if="${#fields.hasErrors('nombre')}"
+                     th:errors="*{nombre}">
+                </div>
+            </div>
+
+            <div class="campo">
+                <label for="razonSocial">Razón social</label>
+
+                <input id="razonSocial"
+                       type="text"
+                       th:field="*{razonSocial}"
+                       placeholder="Ejemplo: Distribuidora Andina S.A.">
+
+                <div class="error"
+                     th:if="${#fields.hasErrors('razonSocial')}"
+                     th:errors="*{razonSocial}">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="fila">
+
+            <div class="campo">
+                <label for="cuit">CUIT</label>
+
+                <input id="cuit"
+                       type="text"
+                       th:field="*{cuit}"
+                       placeholder="Ejemplo: 30-12345678-9">
+
+                <div class="aclaracion">
+                    Se puede escribir con o sin guiones.
+                </div>
+
+                <div class="error"
+                     th:if="${#fields.hasErrors('cuit')}"
+                     th:errors="*{cuit}">
+                </div>
+            </div>
+
+            <div class="campo">
+                <label for="telefono">Teléfono</label>
+
+                <input id="telefono"
+                       type="text"
+                       th:field="*{telefono}"
+                       placeholder="Ejemplo: 261 555-1234">
+
+                <div class="error"
+                     th:if="${#fields.hasErrors('telefono')}"
+                     th:errors="*{telefono}">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="campo">
+            <label for="email">Correo electrónico</label>
+
+            <input id="email"
+                   type="email"
+                   th:field="*{email}"
+                   placeholder="Ejemplo: ventas@proveedor.com">
+
+            <div class="error"
+                 th:if="${#fields.hasErrors('email')}"
+                 th:errors="*{email}">
+            </div>
+        </div>
+
+        <div class="campo">
+            <label for="direccion">Dirección</label>
+
+            <input id="direccion"
+                   type="text"
+                   th:field="*{direccion}"
+                   placeholder="Ejemplo: Acceso Este 1500, Mendoza">
+
+            <div class="error"
+                 th:if="${#fields.hasErrors('direccion')}"
+                 th:errors="*{direccion}">
+            </div>
+        </div>
+
+        <div class="acciones">
+            <a class="volver"
+               th:href="@{/}">
+                Inicio
+            </a>
+
+            <button type="submit"
+                    th:text="${proveedor.id == null}
+                        ? 'Guardar proveedor'
+                        : 'Actualizar proveedor'">
+            </button>
+
+            <a class="volver"
+               th:href="@{/proveedores}">
+                Volver
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>

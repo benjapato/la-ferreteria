@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Usuarios | La Ferretería</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 35px;
+            background-color: #f4f4f4;
+            color: #222;
+            font-family: Arial, sans-serif;
+        }
+
+        .contenedor {
+            width: 100%;
+            max-width: 1200px;
+            margin: auto;
+            padding: 28px;
+            border-radius: 10px;
+            background-color: white;
+        }
+
+        .encabezado {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        .acciones-encabezado {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .boton {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            padding: 0 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .nuevo {
+            background-color: #333;
+            color: white;
+        }
+
+        .volver {
+            background-color: #e5e5e5;
+            color: #333;
+        }
+
+        .mensaje,
+        .error {
+            margin-top: 18px;
+            padding: 12px 14px;
+            border-radius: 6px;
+        }
+
+        .mensaje {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .buscador {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 22px;
+        }
+
+        .buscador input {
+            width: 380px;
+            max-width: 100%;
+            height: 40px;
+            padding: 0 12px;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .buscar {
+            background-color: #333;
+            color: white;
+        }
+
+        .limpiar {
+            background-color: #e5e5e5;
+            color: #333;
+        }
+
+        .tabla-contenedor {
+            margin-top: 22px;
+            overflow-x: auto;
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            min-width: 900px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e3e3e3;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background-color: #fafafa;
+        }
+
+        .rol,
+        .estado {
+            display: inline-block;
+            min-width: 100px;
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .rol-administrador {
+            background-color: #dbeafe;
+            color: #1e3a8a;
+        }
+
+        .rol-vendedor {
+            background-color: #fff3cd;
+            color: #664d03;
+        }
+
+        .estado-activo {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .estado-inactivo {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .acciones {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .acciones form {
+            margin: 0;
+        }
+
+        .editar {
+            background-color: #dbeafe;
+            color: #1e3a8a;
+        }
+
+        .activar {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .desactivar {
+            background-color: #f3c5c5;
+            color: #8b0000;
+        }
+
+        .sin-datos {
+            padding: 30px;
+            color: #666;
+            text-align: center;
+        }
+
+        @media (max-width: 650px) {
+            body {
+                padding: 12px;
+            }
+
+            .contenedor {
+                padding: 18px;
+            }
+
+            .acciones-encabezado,
+            .acciones-encabezado .boton,
+            .buscador,
+            .buscador input,
+            .buscador .boton {
+                width: 100%;
+            }
+        }
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <div class="encabezado">
+        <h1>Usuarios</h1>
+
+        <div class="acciones-encabezado">
+            <a class="boton volver"
+               th:href="@{/}">
+                Inicio
+            </a>
+
+            <a class="boton nuevo"
+               th:href="@{/usuarios/nuevo}">
+                Nuevo usuario
+            </a>
+
+        </div>
+    </div>
+
+    <div th:if="${mensaje}"
+         class="mensaje"
+         th:text="${mensaje}">
+    </div>
+
+    <div th:if="${error}"
+         class="error"
+         th:text="${error}">
+    </div>
+
+    <form class="buscador"
+          th:action="@{/usuarios}"
+          method="get">
+
+        <input type="text"
+               name="buscar"
+               th:value="${buscar}"
+               placeholder="Buscar por nombre o usuario"
+               autocomplete="off">
+
+        <button type="submit"
+                class="boton buscar">
+            Buscar
+        </button>
+
+        <a th:if="${buscar != null and !buscar.isBlank()}"
+           class="boton limpiar"
+           th:href="@{/usuarios}">
+            Limpiar
+        </a>
+    </form>
+
+    <div class="tabla-contenedor">
+        <table>
+            <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Usuario</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Creado</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="usuario : ${usuarios}">
+                <td th:text="${usuario.nombreCompleto}">
+                </td>
+
+                <td>
+                    <strong th:text="${usuario.nombreUsuario}">
+                    </strong>
+                </td>
+
+                <td>
+                    <span class="rol"
+                          th:classappend="${usuario.rol.name() == 'ADMINISTRADOR'
+                            ? ' rol-administrador'
+                            : ' rol-vendedor'}"
+                          th:text="${usuario.rol.name() == 'ADMINISTRADOR'
+                            ? 'Administrador'
+                            : 'Vendedor'}">
+                    </span>
+                </td>
+
+                <td>
+                    <span class="estado"
+                          th:classappend="${usuario.activo
+                            ? ' estado-activo'
+                            : ' estado-inactivo'}"
+                          th:text="${usuario.activo
+                            ? 'Activo'
+                            : 'Inactivo'}">
+                    </span>
+                </td>
+
+                <td th:text="${#temporals.format(
+                        usuario.fechaCreacion,
+                        'dd/MM/yyyy HH:mm'
+                    )}">
+                </td>
+
+                <td>
+                    <div class="acciones">
+                        <a class="boton editar"
+                           th:href="@{/usuarios/editar/{id}(id=${usuario.id})}">
+                            Editar
+                        </a>
+
+                        <form th:action="@{/usuarios/cambiar-estado/{id}(id=${usuario.id})}"
+                              method="post"
+                              onsubmit="return confirmarCambioEstado(this)">
+
+                            <button type="submit"
+                                    class="boton"
+                                    th:classappend="${usuario.activo
+                                        ? ' desactivar'
+                                        : ' activar'}"
+                                    th:text="${usuario.activo
+                                        ? 'Desactivar'
+                                        : 'Activar'}">
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(usuarios)}">
+                <td colspan="6"
+                    class="sin-datos">
+                    No se encontraron usuarios.
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    function confirmarCambioEstado(formulario) {
+        const boton = formulario.querySelector("button");
+
+        return confirm(
+            "¿" + boton.textContent.trim()
+            + " este usuario?"
+        );
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,2200 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Nueva venta | La Ferretería</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 40px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .contenedor {
+            max-width: 1150px;
+            margin: auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .fila {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .campo {
+            margin-top: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        .etiqueta-con-accion,
+        .encabezado-productos {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .etiqueta-con-accion {
+            margin-bottom: 7px;
+        }
+
+        .etiqueta-con-accion label,
+        .encabezado-productos h2 {
+            margin: 0;
+        }
+
+        .encabezado-productos {
+            margin-top: 26px;
+        }
+
+        .accion-alta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            min-height: 36px;
+            padding: 7px 12px;
+            border: 1px solid #168052;
+            border-radius: 5px;
+            background-color: #e8f4ed;
+            color: #12653f;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .accion-alta:hover {
+            background-color: #d8ecdf;
+        }
+
+        select,
+        input,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+            font-size: 15px;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .aclaracion {
+            margin-top: 6px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .error-general {
+            margin-bottom: 20px;
+            padding: 13px;
+            border-radius: 5px;
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .aviso {
+            margin-top: 20px;
+            padding: 13px;
+            border-radius: 5px;
+            background-color: #dbeafe;
+            color: #1e3a8a;
+        }
+
+        .tabla-contenedor {
+            overflow: visible;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        th:nth-child(1),
+        td:nth-child(1) {
+            width: 65%;
+        }
+
+        th:nth-child(2),
+        td:nth-child(2) {
+            width: 25%;
+        }
+
+        th:nth-child(3),
+        td:nth-child(3) {
+            width: 10%;
+        }
+
+        /*
+         * Autocompletado de producto.
+         */
+        .producto-autocomplete {
+            position: relative;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .producto-busqueda:focus {
+            border-color: #2563eb;
+            outline: 2px solid rgba(37, 99, 235, 0.15);
+        }
+
+        .resultados-productos {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: none;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            background-color: white;
+            box-shadow: 0 5px 14px rgba(0, 0, 0, 0.15);
+        }
+
+        .fila-detalle {
+            position: relative;
+        }
+
+        .fila-detalle:focus-within {
+            z-index: 50;
+        }
+
+        tbody,
+        tr,
+        td {
+            overflow: visible;
+        }
+
+        .resultado-producto {
+            display: block;
+            width: 100%;
+            padding: 11px 13px;
+            border: none;
+            border-bottom: 1px solid #eee;
+            background-color: white;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .resultado-producto:last-child {
+            border-bottom: none;
+        }
+
+        .resultado-producto:hover {
+            background-color: #eff6ff;
+        }
+
+        .resultado-nombre {
+            display: block;
+            color: #111;
+            font-weight: bold;
+        }
+
+        .resultado-datos {
+            display: block;
+            margin-top: 4px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .sin-resultados {
+            padding: 14px;
+            color: #666;
+            text-align: center;
+        }
+
+        .producto-seleccionado {
+            display: none;
+            margin-top: 7px;
+            padding: 8px 10px;
+            border-radius: 5px;
+            background-color: #d1e7dd;
+            color: #0f5132;
+            font-size: 13px;
+        }
+
+        .cantidad-input {
+            min-width: 150px;
+        }
+
+        .boton-agregar {
+            margin-top: 15px;
+            padding: 9px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #dbeafe;
+            color: #1e3a8a;
+            cursor: pointer;
+        }
+
+        .boton-eliminar {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #f3c5c5;
+            color: #8b0000;
+            cursor: pointer;
+        }
+
+        .acciones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .guardar,
+        .volver {
+            display: inline-block;
+            padding: 11px 18px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .guardar {
+            background-color: #333;
+            color: white;
+        }
+
+        .volver {
+            background-color: #ddd;
+            color: #333;
+        }
+
+        .pagos-combinados {
+            display: none;
+            margin-top: 26px;
+            padding: 20px 0;
+            border-top: 1px solid #cccccc;
+            border-bottom: 1px solid #cccccc;
+        }
+
+        .pagos-combinados h2 {
+            margin: 0 0 8px;
+            font-size: 20px;
+        }
+
+        .pagos-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 16px;
+        }
+
+        .resumen-pagos {
+            display: flex;
+            justify-content: flex-end;
+            gap: 24px;
+            margin-top: 16px;
+            font-weight: bold;
+        }
+
+        .diferencia-pagos.invalida {
+            color: #b42318;
+        }
+
+        .diferencia-pagos.valida {
+            color: #157347;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 15px;
+            }
+
+            .contenedor {
+                padding: 20px;
+            }
+
+            .fila {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .pagos-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .resumen-pagos {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .etiqueta-con-accion,
+            .encabezado-productos {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .accion-alta {
+                width: 100%;
+            }
+
+            .producto-autocomplete {
+                min-width: 300px;
+            }
+        }
+        /* Alinea todos los campos al comienzo de cada fila */
+        #detalles-body .fila-detalle > td {
+            vertical-align: top !important;
+        }
+
+        /* Misma altura para buscador y cantidad */
+        #detalles-body .producto-busqueda,
+        #detalles-body .cantidad-input {
+            height: 40px;
+            margin: 0;
+        }
+
+        /* Alinea el botón Quitar con los campos */
+        #detalles-body .boton-eliminar {
+            height: 40px;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        /* El cartel verde queda debajo sin mover los otros campos */
+        #detalles-body .producto-seleccionado {
+            margin-top: 7px;
+        }
+
+        /* Permite que la lista aparezca fuera de la tabla */
+        .tabla-contenedor,
+        #detalles-body,
+        #detalles-body tr,
+        #detalles-body td {
+            overflow: visible;
+        }
+
+        /* Buscador de clientes */
+
+        .cliente-autocomplete {
+            position: relative;
+            width: 100%;
+        }
+
+        .cliente-busqueda {
+            width: 100%;
+            background-color: white;
+        }
+
+        .cliente-busqueda:focus {
+            border-color: #2563eb;
+            outline: 2px solid rgba(37, 99, 235, 0.15);
+        }
+
+        .resultados-clientes {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            z-index: 1500;
+            display: none;
+            max-height: 320px;
+            overflow-y: auto;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            background-color: white;
+            box-shadow: 0 5px 14px rgba(0, 0, 0, 0.15);
+        }
+
+        .resultado-cliente {
+            display: block;
+            width: 100%;
+            padding: 11px 13px;
+            border: none;
+            border-bottom: 1px solid #eee;
+            background-color: white;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .resultado-cliente:last-child {
+            border-bottom: none;
+        }
+
+        .resultado-cliente:hover {
+            background-color: #eff6ff;
+        }
+
+        .resultado-cliente-nombre {
+            display: block;
+            color: #111;
+            font-weight: bold;
+        }
+
+        .resultado-cliente-datos {
+            display: block;
+            margin-top: 4px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .cliente-seleccionado {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-top: 7px;
+            padding: 9px 11px;
+            border-radius: 5px;
+            background-color: #d1e7dd;
+            color: #0f5132;
+            font-size: 13px;
+        }
+
+        .quitar-cliente {
+            flex-shrink: 0;
+            padding: 5px 9px;
+            border: none;
+            border-radius: 4px;
+            background-color: #f3c5c5;
+            color: #8b0000;
+            cursor: pointer;
+        }
+
+        .quitar-cliente:hover {
+            background-color: #e8aaaa;
+        }
+
+        .sin-clientes {
+            padding: 14px;
+            color: #666;
+            text-align: center;
+        }
+
+        /* Centrar la columna Acción y el botón Quitar */
+        table th:nth-child(3),
+        table td:nth-child(3) {
+            text-align: center;
+        }
+
+        #detalles-body td:nth-child(3) {
+            vertical-align: top !important;
+        }
+
+        #detalles-body .boton-eliminar {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <h1>Nueva venta</h1>
+
+    <p>
+        Al registrar la venta se descontará automáticamente el stock.
+    </p>
+
+    <div class="aviso">
+        Para vender a cuenta corriente es obligatorio seleccionar
+        un cliente registrado.
+    </div>
+
+    <div th:if="${error}"
+         class="error-general"
+         th:text="${error}">
+    </div>
+
+    <form th:action="@{/ventas/guardar}"
+          th:object="${venta}"
+          method="post"
+          onsubmit="return validarVenta()">
+
+        <div class="fila">
+
+            <div class="campo">
+
+                <div class="etiqueta-con-accion">
+                    <label for="clienteBusqueda">
+                        Cliente registrado
+                    </label>
+
+                    <a class="accion-alta"
+                       th:href="@{/clientes/nuevo}"
+                       target="_blank"
+                       rel="noopener"
+                       title="Abrir alta de cliente">
+                        + Nuevo cliente
+                    </a>
+                </div>
+
+                <div class="cliente-autocomplete">
+
+                    <!-- Campo visible para buscar -->
+
+                    <input id="clienteBusqueda"
+                           type="text"
+                           class="cliente-busqueda"
+                           placeholder="Buscar por nombre o documento"
+                           autocomplete="off"
+                           oninput="buscarClientes(this)"
+                           onfocus="mostrarClientes(this)"
+                           onkeydown="manejarTeclaCliente(event)">
+
+                    <!-- Campo oculto que envía el ID al controlador -->
+
+                    <input id="cliente"
+                           type="hidden"
+                           th:field="*{cliente.id}">
+
+                    <!-- Resultados encontrados -->
+
+                    <div id="resultadosClientes"
+                         class="resultados-clientes">
+                    </div>
+
+                    <!-- Cliente elegido -->
+
+                    <div id="clienteSeleccionado"
+                         class="cliente-seleccionado">
+
+            <span id="clienteResumen">
+            </span>
+
+                        <button type="button"
+                                class="quitar-cliente"
+                                onclick="limpiarCliente()">
+                            Quitar
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="aclaracion">
+                    Es obligatorio seleccionar un cliente cuando la forma
+                    de pago sea cuenta corriente. Si no seleccionás ninguno,
+                    la venta será para consumidor final o cliente no registrado.
+                </div>
+
+            </div>
+
+            <div class="campo">
+
+                <label for="formaPago">
+                    Forma de pago
+                </label>
+
+                <select id="formaPago"
+                        th:field="*{formaPago}"
+                        required>
+
+                    <option value="">
+                        Seleccione una forma de pago
+                    </option>
+
+                    <option th:each="forma : ${formasPago}"
+                            th:value="${forma}"
+                            th:text="${#strings.replace(
+                                forma.name(),
+                                '_',
+                                ' '
+                            )}">
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+        <div class="campo"
+             id="grupoNombreManual">
+
+            <label for="nombreCliente">
+                Nombre del cliente no registrado
+            </label>
+
+            <input id="nombreCliente"
+                   type="text"
+                   th:field="*{nombreCliente}"
+                   maxlength="150"
+                   placeholder="Dejar vacío para Consumidor final">
+
+            <div class="aclaracion">
+                Este campo se utiliza solamente cuando no seleccionás
+                un cliente registrado.
+            </div>
+
+        </div>
+
+        <div class="campo">
+
+            <label for="observaciones">
+                Observaciones
+            </label>
+
+            <textarea id="observaciones"
+                      th:field="*{observaciones}"
+                      maxlength="500"
+                      placeholder="Información opcional sobre la venta">
+            </textarea>
+
+        </div>
+
+        <div class="encabezado-productos">
+            <h2>Productos vendidos</h2>
+
+            <a th:if="${esAdministrador}"
+               class="accion-alta"
+               th:href="@{/productos/nuevo}"
+               target="_blank"
+               rel="noopener"
+               title="Abrir alta de producto">
+                + Nuevo producto
+            </a>
+        </div>
+
+        <p class="aclaracion">
+            Escribí el nombre o código del producto y seleccionalo
+            directamente desde la lista de resultados.
+        </p>
+
+        <div class="tabla-contenedor">
+
+            <table>
+
+                <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Acción</th>
+                </tr>
+                </thead>
+
+                <tbody id="detalles-body">
+
+                <tr th:each="detalle, estado : *{detalles}"
+                    class="fila-detalle">
+
+                    <td>
+
+                        <div class="producto-autocomplete">
+
+                            <input type="text"
+                                   class="producto-busqueda"
+                                   placeholder="Ejemplo: tornillo"
+                                   autocomplete="off"
+                                   oninput="buscarProductos(this)"
+                                   onfocus="mostrarProductos(this)"
+                                   onkeydown="manejarTeclaBuscador(event, this)">
+
+                            <input type="hidden"
+                                   class="producto-id"
+                                   th:field="*{detalles[__${estado.index}__].producto.id}">
+
+                            <div class="resultados-productos">
+                            </div>
+
+                            <div class="producto-seleccionado">
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                    <td>
+
+                        <input class="cantidad-input"
+                               type="number"
+                               min="0.001"
+                               step="0.001"
+                               th:field="*{detalles[__${estado.index}__].cantidad}"
+                               placeholder="Cantidad"
+                               required>
+
+                    </td>
+
+                    <td>
+
+                        <button type="button"
+                                class="boton-eliminar"
+                                onclick="eliminarFila(this)">
+                            Quitar
+                        </button>
+
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <button type="button"
+                class="boton-agregar"
+                onclick="agregarFila()">
+            Agregar otro producto
+        </button>
+
+        <section id="grupoPagosCombinados"
+                 class="pagos-combinados">
+
+            <h2>Distribucion del pago</h2>
+
+            <p class="aclaracion">
+                Ingresa importes en al menos dos medios. La suma debe
+                coincidir con el total calculado de la venta.
+            </p>
+
+            <div class="pagos-grid">
+
+                <div th:each="pago, estadoPago : *{pagos}"
+                     class="campo-pago">
+
+                    <input type="hidden"
+                           th:field="*{pagos[__${estadoPago.index}__].formaPago}">
+
+                    <label th:text="${#strings.replace(
+                        pago.formaPago.name(),
+                        '_',
+                        ' '
+                    )}">
+                    </label>
+
+                    <input type="number"
+                           class="importe-pago-combinado"
+                           min="0"
+                           step="0.01"
+                           placeholder="0.00"
+                           th:field="*{pagos[__${estadoPago.index}__].monto}">
+
+                </div>
+
+            </div>
+
+            <div class="resumen-pagos">
+                <span>
+                    Total: $<span id="totalVentaCalculado">0,00</span>
+                </span>
+
+                <span id="diferenciaPagos"
+                      class="diferencia-pagos invalida">
+                    Falta asignar: $0,00
+                </span>
+            </div>
+
+        </section>
+
+        <div class="acciones">
+            <a class="volver"
+               th:href="@{/}">
+                Inicio
+            </a>
+
+            <button type="submit"
+                    class="guardar">
+                Registrar venta
+            </button>
+
+            <a class="volver"
+               th:href="@{/ventas}">
+                Volver
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+<!-- Clientes disponibles para el autocompletado -->
+
+<div id="catalogo-clientes"
+     hidden>
+
+    <div th:each="clienteItem : ${clientes}"
+         class="cliente-catalogo"
+         th:attr="
+            data-id=${clienteItem.id},
+            data-nombre=${clienteItem.nombre},
+            data-documento=${clienteItem.documento == null
+                ? ''
+                : clienteItem.documento},
+            data-saldo=${clienteItem.saldoCuentaCorriente}">
+    </div>
+
+</div>
+
+<!-- Productos disponibles para el autocompletado -->
+
+<div id="catalogo-productos"
+     th:data-url-actualizacion="@{/ventas/catalogos}"
+     hidden>
+
+    <div th:each="producto : ${productos}"
+         class="producto-catalogo"
+         th:attr="
+            data-id=${producto.id},
+            data-codigo=${producto.codigo},
+            data-nombre=${producto.nombre},
+            data-stock=${producto.stockActual},
+            data-precio=${producto.precioVenta}">
+    </div>
+
+</div>
+
+<template id="plantilla-fila">
+
+    <tr class="fila-detalle">
+
+        <td>
+
+            <div class="producto-autocomplete">
+
+                <input type="text"
+                       class="producto-busqueda"
+                       placeholder="Ejemplo: tornillo"
+                       autocomplete="off"
+                       oninput="buscarProductos(this)"
+                       onfocus="mostrarProductos(this)"
+                       onkeydown="manejarTeclaBuscador(event, this)">
+
+                <input type="hidden"
+                       class="producto-id">
+
+                <div class="resultados-productos">
+                </div>
+
+                <div class="producto-seleccionado">
+                </div>
+
+            </div>
+
+        </td>
+
+        <td>
+
+            <input class="cantidad-input"
+                   type="number"
+                   min="0.001"
+                   step="0.001"
+                   placeholder="Cantidad"
+                   required>
+
+        </td>
+
+        <td>
+
+            <button type="button"
+                    class="boton-eliminar"
+                    onclick="eliminarFila(this)">
+                Quitar
+            </button>
+
+        </td>
+
+    </tr>
+
+</template>
+
+<script>
+    /*
+     * Elementos principales de cliente
+     * y forma de pago.
+     */
+
+    const formaPago =
+        document.getElementById("formaPago");
+
+    /*
+     * Este es el input hidden que contiene
+     * el ID real del cliente.
+     */
+    const cliente =
+        document.getElementById("cliente");
+
+    const clienteBusqueda =
+        document.getElementById("clienteBusqueda");
+
+    const resultadosClientes =
+        document.getElementById("resultadosClientes");
+
+    const clienteSeleccionado =
+        document.getElementById("clienteSeleccionado");
+
+    const clienteResumen =
+        document.getElementById("clienteResumen");
+
+    const nombreCliente =
+        document.getElementById("nombreCliente");
+
+    const grupoNombreManual =
+        document.getElementById("grupoNombreManual");
+
+    const grupoPagosCombinados =
+        document.getElementById("grupoPagosCombinados");
+
+    const totalVentaCalculado =
+        document.getElementById("totalVentaCalculado");
+
+    const diferenciaPagos =
+        document.getElementById("diferenciaPagos");
+
+    /*
+     * Catálogos utilizados por los buscadores.
+     */
+
+    let catalogoProductos = [];
+    let catalogoClientes = [];
+    let altaExternaPendiente = false;
+
+    const urlActualizacionCatalogos =
+        document.getElementById("catalogo-productos")
+            .dataset.urlActualizacion;
+
+    /*
+     * Carga los productos generados por Thymeleaf.
+     */
+
+    function cargarCatalogoProductos() {
+
+        catalogoProductos = Array.from(
+            document.querySelectorAll(
+                ".producto-catalogo"
+            )
+        ).map(elemento => ({
+
+            id: elemento.dataset.id,
+
+            codigo:
+                elemento.dataset.codigo || "",
+
+            nombre:
+                elemento.dataset.nombre || "",
+
+            stock:
+                elemento.dataset.stock || "0",
+
+            precio:
+                elemento.dataset.precio || "0"
+        }));
+    }
+
+    /*
+     * Carga los clientes generados por Thymeleaf.
+     */
+
+    function cargarCatalogoClientes() {
+
+        catalogoClientes = Array.from(
+            document.querySelectorAll(
+                ".cliente-catalogo"
+            )
+        ).map(elemento => ({
+
+            id: elemento.dataset.id,
+
+            nombre:
+                elemento.dataset.nombre || "",
+
+            documento:
+                elemento.dataset.documento || "",
+
+            saldo:
+                elemento.dataset.saldo || "0"
+        }));
+    }
+
+    async function actualizarCatalogos() {
+
+        try {
+            const respuesta = await fetch(
+                urlActualizacionCatalogos,
+                {
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                }
+            );
+
+            if (!respuesta.ok) {
+                return;
+            }
+
+            const catalogos = await respuesta.json();
+
+            catalogoProductos = catalogos.productos.map(
+                producto => ({
+                    id: String(producto.id),
+                    codigo: producto.codigo || "",
+                    nombre: producto.nombre || "",
+                    stock: String(producto.stock || "0"),
+                    precio: String(producto.precio || "0")
+                })
+            );
+
+            catalogoClientes = catalogos.clientes.map(
+                clienteItem => ({
+                    id: String(clienteItem.id),
+                    nombre: clienteItem.nombre || "",
+                    documento: clienteItem.documento || "",
+                    saldo: String(clienteItem.saldo || "0")
+                })
+            );
+        } catch (error) {
+            // La venta puede continuar con el catálogo ya cargado.
+        }
+    }
+
+    /*
+     * Agregar una nueva fila de producto.
+     */
+
+    function agregarFila() {
+
+        const plantilla =
+            document.getElementById(
+                "plantilla-fila"
+            );
+
+        const cuerpo =
+            document.getElementById(
+                "detalles-body"
+            );
+
+        const nuevaFila =
+            plantilla.content.cloneNode(true);
+
+        cuerpo.appendChild(nuevaFila);
+
+        reindexarFilas();
+
+        const filas =
+            document.querySelectorAll(
+                ".fila-detalle"
+            );
+
+        const ultimaFila =
+            filas[filas.length - 1];
+
+        const buscador =
+            ultimaFila.querySelector(
+                ".producto-busqueda"
+            );
+
+        /*
+         * Baja automáticamente hasta
+         * la nueva fila.
+         */
+        requestAnimationFrame(() => {
+
+            ultimaFila.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+
+            setTimeout(() => {
+
+                buscador.focus({
+                    preventScroll: true
+                });
+
+            }, 350);
+        });
+    }
+
+    /*
+     * Eliminar una fila de producto.
+     */
+
+    function eliminarFila(boton) {
+
+        const filas =
+            document.querySelectorAll(
+                ".fila-detalle"
+            );
+
+        if (filas.length === 1) {
+
+            alert(
+                "La venta debe tener al menos un producto."
+            );
+
+            return;
+        }
+
+        boton
+            .closest(".fila-detalle")
+            .remove();
+
+        reindexarFilas();
+        actualizarResumenPagos();
+    }
+
+    /*
+     * Actualizar los name después de
+     * agregar o quitar filas.
+     */
+
+    function reindexarFilas() {
+
+        document
+            .querySelectorAll(
+                ".fila-detalle"
+            )
+            .forEach((fila, indice) => {
+
+                const productoId =
+                    fila.querySelector(
+                        ".producto-id"
+                    );
+
+                const cantidad =
+                    fila.querySelector(
+                        ".cantidad-input"
+                    );
+
+                productoId.name =
+                    `detalles[${indice}].producto.id`;
+
+                cantidad.name =
+                    `detalles[${indice}].cantidad`;
+            });
+    }
+
+    /*
+     * El usuario escribió en el buscador
+     * de productos.
+     */
+
+    function buscarProductos(input) {
+
+        const contenedor =
+            input.closest(
+                ".producto-autocomplete"
+            );
+
+        /*
+         * Al modificar el texto se borra
+         * la selección anterior.
+         */
+        contenedor
+            .querySelector(".producto-id")
+            .value = "";
+
+        const seleccionado =
+            contenedor.querySelector(
+                ".producto-seleccionado"
+            );
+
+        seleccionado.style.display =
+            "none";
+
+        seleccionado.textContent =
+            "";
+
+        actualizarResumenPagos();
+
+        mostrarCoincidenciasProductos(
+            input
+        );
+    }
+
+    /*
+     * Mostrar productos al enfocar.
+     */
+
+    function mostrarProductos(input) {
+
+        mostrarCoincidenciasProductos(
+            input
+        );
+    }
+
+    /*
+     * Buscar coincidencias de productos.
+     */
+
+    function mostrarCoincidenciasProductos(
+        input
+    ) {
+
+        const contenedor =
+            input.closest(
+                ".producto-autocomplete"
+            );
+
+        const resultados =
+            contenedor.querySelector(
+                ".resultados-productos"
+            );
+
+        const texto =
+            normalizarTexto(input.value);
+
+        const coincidencias =
+            catalogoProductos
+                .filter(producto => {
+
+                    const datos =
+                        normalizarTexto(
+                            producto.codigo
+                            + " "
+                            + producto.nombre
+                        );
+
+                    return datos.includes(
+                        texto
+                    );
+                })
+                .slice(0, 12);
+
+        resultados.innerHTML = "";
+
+        if (coincidencias.length === 0) {
+
+            const mensaje =
+                document.createElement(
+                    "div"
+                );
+
+            mensaje.className =
+                "sin-resultados";
+
+            mensaje.textContent =
+                "No se encontraron productos";
+
+            resultados.appendChild(
+                mensaje
+            );
+
+            resultados.style.display =
+                "block";
+
+            return;
+        }
+
+        coincidencias.forEach(
+            producto => {
+
+                const boton =
+                    document.createElement(
+                        "button"
+                    );
+
+                boton.type = "button";
+
+                boton.className =
+                    "resultado-producto";
+
+                const nombre =
+                    document.createElement(
+                        "span"
+                    );
+
+                nombre.className =
+                    "resultado-nombre";
+
+                nombre.textContent =
+                    producto.codigo
+                    + " - "
+                    + producto.nombre;
+
+                const datos =
+                    document.createElement(
+                        "span"
+                    );
+
+                datos.className =
+                    "resultado-datos";
+
+                datos.textContent =
+                    "Stock: "
+                    + formatearCantidad(
+                        producto.stock
+                    )
+                    + " | Precio: $"
+                    + formatearDinero(
+                        producto.precio
+                    );
+
+                boton.appendChild(
+                    nombre
+                );
+
+                boton.appendChild(
+                    datos
+                );
+
+                boton.addEventListener(
+                    "click",
+                    function () {
+
+                        seleccionarProducto(
+                            input,
+                            producto
+                        );
+                    }
+                );
+
+                resultados.appendChild(
+                    boton
+                );
+            }
+        );
+
+        resultados.style.display =
+            "block";
+    }
+
+    /*
+     * Seleccionar un producto encontrado.
+     */
+
+    function seleccionarProducto(
+        input,
+        producto
+    ) {
+
+        const contenedor =
+            input.closest(
+                ".producto-autocomplete"
+            );
+
+        const productoId =
+            contenedor.querySelector(
+                ".producto-id"
+            );
+
+        const resultados =
+            contenedor.querySelector(
+                ".resultados-productos"
+            );
+
+        const seleccionado =
+            contenedor.querySelector(
+                ".producto-seleccionado"
+            );
+
+        productoId.value =
+            producto.id;
+
+        input.value =
+            producto.codigo
+            + " - "
+            + producto.nombre;
+
+        seleccionado.textContent =
+            "Seleccionado: "
+            + producto.nombre
+            + " | Stock: "
+            + formatearCantidad(
+                producto.stock
+            )
+            + " | Precio: $"
+            + formatearDinero(
+                producto.precio
+            );
+
+        seleccionado.style.display =
+            "block";
+
+        resultados.style.display =
+            "none";
+
+        actualizarResumenPagos();
+    }
+
+    /*
+     * Recuperar productos seleccionados
+     * después de un error de validación.
+     */
+
+    function inicializarProductosSeleccionados() {
+
+        document
+            .querySelectorAll(
+                ".producto-autocomplete"
+            )
+            .forEach(contenedor => {
+
+                const productoId =
+                    contenedor.querySelector(
+                        ".producto-id"
+                    );
+
+                if (!productoId.value) {
+                    return;
+                }
+
+                const producto =
+                    catalogoProductos.find(
+                        item =>
+                            String(item.id)
+                            === String(
+                                productoId.value
+                            )
+                    );
+
+                if (!producto) {
+                    return;
+                }
+
+                seleccionarProducto(
+                    contenedor.querySelector(
+                        ".producto-busqueda"
+                    ),
+                    producto
+                );
+            });
+    }
+
+    /*
+     * Escape cierra el buscador de producto.
+     */
+
+    function manejarTeclaBuscador(
+        evento,
+        input
+    ) {
+
+        if (evento.key === "Escape") {
+
+            input
+                .closest(
+                    ".producto-autocomplete"
+                )
+                .querySelector(
+                    ".resultados-productos"
+                )
+                .style.display = "none";
+        }
+    }
+
+    /*
+     * El usuario escribió en el buscador
+     * de clientes.
+     */
+
+    function buscarClientes(input) {
+
+        /*
+         * Si modifica el texto, se elimina
+         * el cliente anteriormente elegido.
+         */
+        cliente.value = "";
+
+        clienteSeleccionado.style.display =
+            "none";
+
+        clienteResumen.textContent =
+            "";
+
+        actualizarDatosCliente();
+
+        mostrarCoincidenciasClientes(
+            input.value
+        );
+    }
+
+    /*
+     * Mostrar clientes al enfocar
+     * el campo de búsqueda.
+     */
+
+    function mostrarClientes(input) {
+
+        mostrarCoincidenciasClientes(
+            input.value
+        );
+    }
+
+    /*
+     * Buscar clientes por nombre
+     * o documento.
+     */
+
+    function mostrarCoincidenciasClientes(
+        textoIngresado
+    ) {
+
+        const texto =
+            normalizarTexto(
+                textoIngresado
+            );
+
+        const coincidencias =
+            catalogoClientes
+                .filter(clienteItem => {
+
+                    const datos =
+                        normalizarTexto(
+                            clienteItem.nombre
+                            + " "
+                            + clienteItem.documento
+                        );
+
+                    return datos.includes(
+                        texto
+                    );
+                })
+                .slice(0, 12);
+
+        resultadosClientes.innerHTML =
+            "";
+
+        if (coincidencias.length === 0) {
+
+            const mensaje =
+                document.createElement(
+                    "div"
+                );
+
+            mensaje.className =
+                "sin-clientes";
+
+            mensaje.textContent =
+                "No se encontraron clientes";
+
+            resultadosClientes.appendChild(
+                mensaje
+            );
+
+            resultadosClientes.style.display =
+                "block";
+
+            return;
+        }
+
+        coincidencias.forEach(
+            clienteItem => {
+
+                const boton =
+                    document.createElement(
+                        "button"
+                    );
+
+                boton.type = "button";
+
+                boton.className =
+                    "resultado-cliente";
+
+                const nombre =
+                    document.createElement(
+                        "span"
+                    );
+
+                nombre.className =
+                    "resultado-cliente-nombre";
+
+                nombre.textContent =
+                    clienteItem.nombre;
+
+                const datos =
+                    document.createElement(
+                        "span"
+                    );
+
+                datos.className =
+                    "resultado-cliente-datos";
+
+                const documento =
+                    clienteItem.documento
+                        ? clienteItem.documento
+                        : "Sin documento";
+
+                datos.textContent =
+                    "Documento: "
+                    + documento
+                    + " | "
+                    + obtenerTextoSaldo(
+                        clienteItem.saldo
+                    );
+
+                boton.appendChild(
+                    nombre
+                );
+
+                boton.appendChild(
+                    datos
+                );
+
+                boton.addEventListener(
+                    "click",
+                    function () {
+
+                        seleccionarCliente(
+                            clienteItem
+                        );
+                    }
+                );
+
+                resultadosClientes.appendChild(
+                    boton
+                );
+            }
+        );
+
+        resultadosClientes.style.display =
+            "block";
+    }
+
+    /*
+     * Guardar el cliente seleccionado.
+     */
+
+    function seleccionarCliente(
+        clienteItem
+    ) {
+
+        /*
+         * Se guarda el ID verdadero
+         * en el input hidden.
+         */
+        cliente.value =
+            clienteItem.id;
+
+        clienteBusqueda.value =
+            clienteItem.nombre
+            + (
+                clienteItem.documento
+                    ? " - "
+                    + clienteItem.documento
+                    : ""
+            );
+
+        clienteResumen.textContent =
+            "Seleccionado: "
+            + clienteItem.nombre
+            + " | "
+            + obtenerTextoSaldo(
+                clienteItem.saldo
+            );
+
+        clienteSeleccionado.style.display =
+            "flex";
+
+        resultadosClientes.style.display =
+            "none";
+
+        /*
+         * No se utiliza el nombre manual
+         * si hay un cliente registrado.
+         */
+        nombreCliente.value = "";
+
+        actualizarDatosCliente();
+    }
+
+    /*
+     * Quitar el cliente seleccionado.
+     */
+
+    function limpiarCliente() {
+
+        cliente.value = "";
+
+        clienteBusqueda.value = "";
+
+        clienteResumen.textContent = "";
+
+        clienteSeleccionado.style.display =
+            "none";
+
+        resultadosClientes.style.display =
+            "none";
+
+        actualizarDatosCliente();
+
+        clienteBusqueda.focus({
+            preventScroll: true
+        });
+    }
+
+    /*
+     * Recuperar el cliente seleccionado
+     * después de un error de validación.
+     */
+
+    function inicializarClienteSeleccionado() {
+
+        if (!cliente.value) {
+            return;
+        }
+
+        const clienteEncontrado =
+            catalogoClientes.find(
+                clienteItem =>
+                    String(clienteItem.id)
+                    === String(
+                        cliente.value
+                    )
+            );
+
+        if (!clienteEncontrado) {
+            return;
+        }
+
+        seleccionarCliente(
+            clienteEncontrado
+        );
+    }
+
+    /*
+     * Convertir el saldo del cliente
+     * en un texto entendible.
+     */
+
+    function obtenerTextoSaldo(
+        valorSaldo
+    ) {
+
+        const saldo =
+            Number(valorSaldo);
+
+        if (
+            !Number.isFinite(saldo)
+            || saldo === 0
+        ) {
+            return "Cuenta al día";
+        }
+
+        if (saldo > 0) {
+
+            return "Debe $"
+                + formatearDinero(
+                    saldo
+                );
+        }
+
+        return "A favor $"
+            + formatearDinero(
+                Math.abs(saldo)
+            );
+    }
+
+    /*
+     * Escape cierra la lista de clientes.
+     */
+
+    function manejarTeclaCliente(
+        evento
+    ) {
+
+        if (evento.key === "Escape") {
+
+            resultadosClientes.style.display =
+                "none";
+        }
+    }
+
+    function calcularTotalVenta() {
+
+        let total = 0;
+
+        document
+            .querySelectorAll(".fila-detalle")
+            .forEach(fila => {
+
+                const productoId = fila
+                    .querySelector(".producto-id")
+                    .value;
+
+                const cantidad = Number(
+                    fila.querySelector(".cantidad-input").value
+                );
+
+                const producto = catalogoProductos.find(
+                    item => String(item.id) === String(productoId)
+                );
+
+                if (producto && Number.isFinite(cantidad)) {
+                    total += Number(producto.precio) * cantidad;
+                }
+            });
+
+        return Math.round(total * 100) / 100;
+    }
+
+    function obtenerResumenPagos() {
+
+        let total = 0;
+        let cantidadMedios = 0;
+
+        document
+            .querySelectorAll(".importe-pago-combinado")
+            .forEach(input => {
+
+                const monto = Number(input.value);
+
+                if (Number.isFinite(monto) && monto > 0) {
+                    total += monto;
+                    cantidadMedios++;
+                }
+            });
+
+        return {
+            total: Math.round(total * 100) / 100,
+            cantidadMedios
+        };
+    }
+
+    function actualizarResumenPagos() {
+
+        const totalVenta = calcularTotalVenta();
+        const resumen = obtenerResumenPagos();
+        const diferencia = Math.round(
+            (totalVenta - resumen.total) * 100
+        ) / 100;
+
+        totalVentaCalculado.textContent =
+            formatearDinero(totalVenta);
+
+        diferenciaPagos.classList.remove(
+            "valida",
+            "invalida"
+        );
+
+        if (Math.abs(diferencia) < 0.005) {
+            diferenciaPagos.textContent = "Pago completo";
+            diferenciaPagos.classList.add("valida");
+        } else if (diferencia > 0) {
+            diferenciaPagos.textContent =
+                "Falta asignar: $" + formatearDinero(diferencia);
+            diferenciaPagos.classList.add("invalida");
+        } else {
+            diferenciaPagos.textContent =
+                "Excede por: $" + formatearDinero(Math.abs(diferencia));
+            diferenciaPagos.classList.add("invalida");
+        }
+    }
+
+    function actualizarInterfazPago() {
+
+        const esCombinado = formaPago.value === "COMBINADO";
+
+        grupoPagosCombinados.style.display =
+            esCombinado ? "block" : "none";
+
+        actualizarResumenPagos();
+    }
+
+    /*
+     * Mostrar u ocultar el nombre manual.
+     */
+
+    function actualizarDatosCliente() {
+
+        const esCuentaCorriente =
+            formaPago.value
+            === "CUENTA_CORRIENTE";
+
+        const hayClienteSeleccionado =
+            cliente.value !== "";
+
+        /*
+         * Se oculta el nombre manual cuando:
+         * - hay un cliente registrado;
+         * - la venta es a cuenta corriente.
+         */
+        if (
+            esCuentaCorriente
+            || hayClienteSeleccionado
+        ) {
+            grupoNombreManual.style.display =
+                "none";
+        } else {
+            grupoNombreManual.style.display =
+                "block";
+        }
+
+        /*
+         * No enviamos nombre manual cuando
+         * existe un cliente registrado.
+         */
+        if (
+            hayClienteSeleccionado
+            || esCuentaCorriente
+        ) {
+            nombreCliente.value = "";
+        }
+
+        actualizarInterfazPago();
+    }
+
+    /*
+     * Validar el formulario antes
+     * de registrar la venta.
+     */
+
+    function validarVenta() {
+
+        const esCuentaCorriente =
+            formaPago.value
+            === "CUENTA_CORRIENTE";
+
+        if (
+            esCuentaCorriente
+            && cliente.value === ""
+        ) {
+
+            alert(
+                "Debe buscar y seleccionar un cliente para vender a cuenta corriente."
+            );
+
+            clienteBusqueda.focus();
+
+            return false;
+        }
+
+        const filas =
+            document.querySelectorAll(
+                ".fila-detalle"
+            );
+
+        for (const fila of filas) {
+
+            const productoId =
+                fila.querySelector(
+                    ".producto-id"
+                );
+
+            if (!productoId.value) {
+
+                alert(
+                    "Debe buscar y seleccionar un producto en cada fila."
+                );
+
+                fila
+                    .querySelector(
+                        ".producto-busqueda"
+                    )
+                    .focus();
+
+                return false;
+            }
+        }
+
+        if (formaPago.value === "COMBINADO") {
+
+            const totalVenta = calcularTotalVenta();
+            const resumen = obtenerResumenPagos();
+
+            if (resumen.cantidadMedios < 2) {
+                alert(
+                    "El pago combinado debe usar al menos dos medios."
+                );
+                return false;
+            }
+
+            if (Math.abs(totalVenta - resumen.total) >= 0.005) {
+                alert(
+                    "La suma de los pagos debe coincidir con el total de la venta."
+                );
+                return false;
+            }
+        }
+
+        return confirm(
+            "¿Registrar esta venta y descontar el stock?"
+        );
+    }
+
+    /*
+     * Normalizar textos para ignorar
+     * mayúsculas y acentos.
+     */
+
+    function normalizarTexto(texto) {
+
+        return String(texto || "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(
+                /[\u0300-\u036f]/g,
+                ""
+            )
+            .trim();
+    }
+
+    /*
+     * Formatear cantidad.
+     */
+
+    function formatearCantidad(valor) {
+
+        const numero =
+            Number(valor);
+
+        if (Number.isNaN(numero)) {
+            return valor;
+        }
+
+        return numero.toLocaleString(
+            "es-AR",
+            {
+                maximumFractionDigits: 3
+            }
+        );
+    }
+
+    /*
+     * Formatear dinero.
+     */
+
+    function formatearDinero(valor) {
+
+        const numero =
+            Number(valor);
+
+        if (Number.isNaN(numero)) {
+            return valor;
+        }
+
+        return numero.toLocaleString(
+            "es-AR",
+            {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }
+        );
+    }
+
+    /*
+     * Cerrar resultados al hacer clic
+     * fuera de los buscadores.
+     */
+
+    document.addEventListener(
+        "click",
+        function (evento) {
+
+            if (
+                !evento.target.closest(
+                    ".producto-autocomplete"
+                )
+            ) {
+
+                document
+                    .querySelectorAll(
+                        ".resultados-productos"
+                    )
+                    .forEach(resultados => {
+
+                        resultados.style.display =
+                            "none";
+                    });
+            }
+
+            if (
+                !evento.target.closest(
+                    ".cliente-autocomplete"
+                )
+            ) {
+
+                resultadosClientes.style.display =
+                    "none";
+            }
+        }
+    );
+
+    /*
+     * Actualizar cuando cambia
+     * la forma de pago.
+     */
+
+    formaPago.addEventListener(
+        "change",
+        actualizarDatosCliente
+    );
+
+    document.addEventListener(
+        "input",
+        function (evento) {
+            if (
+                evento.target.matches(".cantidad-input")
+                || evento.target.matches(".importe-pago-combinado")
+            ) {
+                actualizarResumenPagos();
+            }
+        }
+    );
+
+    /*
+     * Inicialización de la página.
+     */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            cargarCatalogoProductos();
+            cargarCatalogoClientes();
+
+            reindexarFilas();
+
+            inicializarProductosSeleccionados();
+            inicializarClienteSeleccionado();
+
+            actualizarDatosCliente();
+
+            document
+                .querySelectorAll(".accion-alta")
+                .forEach(enlace => {
+                    enlace.addEventListener(
+                        "click",
+                        function () {
+                            altaExternaPendiente = true;
+                        }
+                    );
+                });
+        }
+    );
+
+    window.addEventListener(
+        "focus",
+        function () {
+            if (!altaExternaPendiente) {
+                return;
+            }
+
+            altaExternaPendiente = false;
+            actualizarCatalogos();
+        }
+    );
+</script>
+
+</body>
+</html>

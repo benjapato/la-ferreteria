@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Productos | La Ferretería</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .contenedor {
+            max-width: 1400px;
+            margin: auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .encabezado {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .boton-nuevo {
+            display: inline-block;
+            padding: 10px 18px;
+            background-color: #333;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            white-space: nowrap;
+        }
+
+        .boton-nuevo:hover {
+            background-color: #555;
+        }
+
+        .tabla-contenedor {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+        }
+
+        tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .activo {
+            color: green;
+            font-weight: bold;
+        }
+
+        .inactivo {
+            color: red;
+            font-weight: bold;
+        }
+
+        .stock-bajo {
+            color: #b45309;
+            font-weight: bold;
+        }
+
+        .sin-stock {
+            color: red;
+            font-weight: bold;
+        }
+
+        .sin-datos {
+            padding: 25px;
+            text-align: center;
+            color: #666;
+        }
+
+        .acciones {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .acciones form {
+            margin: 0;
+        }
+
+        .boton-editar {
+            display: inline-block;
+            padding: 7px 12px;
+            background-color: #e0e0e0;
+            color: #333;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .boton-editar:hover {
+            background-color: #c8c8c8;
+        }
+
+        .boton-desactivar,
+        .boton-activar {
+            padding: 7px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .boton-desactivar {
+            background-color: #f3c5c5;
+            color: #8b0000;
+        }
+
+        .boton-desactivar:hover {
+            background-color: #e9aaaa;
+        }
+
+        .boton-activar {
+            background-color: #c8e6c9;
+            color: #176b1b;
+        }
+
+        .boton-activar:hover {
+            background-color: #a8d8aa;
+        }
+
+        .volver {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 9px 15px;
+            background-color: #ddd;
+            color: #333;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .volver:hover {
+            background-color: #c8c8c8;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 15px;
+            }
+
+            .encabezado {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+        .buscador {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .buscador input {
+            width: 330px;
+            max-width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #bbbbbb;
+            border-radius: 5px;
+            font-size: 15px;
+        }
+
+        .boton-buscar,
+        .boton-limpiar {
+            display: inline-block;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 5px;
+            font-size: 15px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .boton-buscar {
+            background-color: #333333;
+            color: white;
+        }
+
+        .boton-limpiar {
+            background-color: #dddddd;
+            color: #333333;
+        }
+        .paginacion {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 18px 0;
+        }
+
+        .paginacion button {
+            width: 40px;
+            height: 36px;
+            border: 1px solid #b8b8b8;
+            border-radius: 5px;
+            background-color: white;
+            color: #222;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .paginacion button:hover:not(:disabled) {
+            background-color: #eeeeee;
+        }
+
+        .paginacion button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .paginacion span {
+            min-width: 130px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <div class="encabezado">
+
+        <div>
+            <h1>Productos</h1>
+            <p>Listado de productos registrados en la ferretería.</p>
+        </div>
+
+        <a class="boton-nuevo"
+           th:href="@{/productos/nuevo}">
+            Nuevo producto
+        </a>
+
+    </div>
+
+    <form class="buscador"
+          th:action="@{/productos}"
+          method="get">
+
+        <input type="text"
+               name="buscar"
+               th:value="${buscar}"
+               placeholder="Buscar por código o nombre">
+
+        <button type="submit"
+                class="boton-buscar">
+            Buscar
+        </button>
+
+        <a th:if="${buscar != null and !buscar.isBlank()}"
+           class="boton-limpiar"
+           th:href="@{/productos}">
+            Limpiar
+        </a>
+
+    </form>
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+            <tr>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Marca</th>
+                <th>Categoría</th>
+                <th>Precio compra</th>
+                <th>Precio venta</th>
+                <th>Stock actual</th>
+                <th>Stock mínimo</th>
+                <th>Unidad</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="producto : ${productos}">
+
+                <td th:text="${producto.codigo}">
+                </td>
+
+                <td th:text="${producto.nombre}">
+                </td>
+
+                <td th:text="${#strings.isEmpty(producto.marca)
+                              ? '-'
+                              : producto.marca}">
+                </td>
+
+                <td th:text="${producto.categoria.nombre}">
+                </td>
+
+                <td>
+                    <span>$ </span>
+                    <span th:text="${producto.precioCompra}"></span>
+                </td>
+
+                <td>
+                    <span>$ </span>
+                    <span th:text="${producto.precioVenta}"></span>
+                </td>
+
+                <td>
+
+                     <span th:if="${producto.stockActual.signum() eq 0}"
+                           class="sin-stock"
+                           th:text="${producto.stockActual.stripTrailingZeros().toPlainString()}">
+                     </span>
+
+                    <span th:if="${producto.stockActual.signum() gt 0
+                          and producto.stockActual.compareTo(producto.stockMinimo) le 0}"
+                          class="stock-bajo"
+                          th:text="${producto.stockActual.stripTrailingZeros().toPlainString()}">
+                    </span>
+
+                    <span th:if="${producto.stockActual.compareTo(producto.stockMinimo) gt 0}"
+                          th:text="${producto.stockActual.stripTrailingZeros().toPlainString()}">
+                    </span>
+
+                </td>
+
+                <td th:text="${producto.stockMinimo.stripTrailingZeros().toPlainString()}">
+                </td>
+
+                <td th:text="${producto.unidadMedida}">
+                </td>
+
+                <td>
+                    <span th:if="${producto.activo}"
+                          class="activo">
+                        Activo
+                    </span>
+
+                    <span th:unless="${producto.activo}"
+                          class="inactivo">
+                        Inactivo
+                    </span>
+                </td>
+
+                <td>
+                    <div class="acciones">
+
+                        <a class="boton-editar"
+                           th:href="@{/productos/editar/{id}(id=${producto.id})}">
+                            Editar
+                        </a>
+
+                        <form th:action="@{/productos/cambiar-estado/{id}(id=${producto.id})}"
+                              method="post">
+
+                            <button type="submit"
+                                    th:class="${producto.activo}
+                                        ? 'boton-desactivar'
+                                        : 'boton-activar'"
+                                    th:text="${producto.activo}
+                                        ? 'Desactivar'
+                                        : 'Activar'">
+                            </button>
+
+                        </form>
+
+                    </div>
+                </td>
+
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(productos)}">
+
+                <td colspan="11"
+                    class="sin-datos">
+
+                    <span th:if="${buscar == null or buscar.isBlank()}">
+                     Todavía no hay productos registrados.
+                    </span>
+
+                    <span th:if="${buscar != null and !buscar.isBlank()}">
+                         No se encontraron productos para:
+                        <strong th:text="${buscar}"></strong>
+                    </span>
+
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <nav th:if="${pagina != null and pagina.totalPages > 1}"
+         class="paginacion"
+         aria-label="Paginacion">
+        <button type="button"
+                title="Pagina anterior"
+                aria-label="Pagina anterior"
+                th:disabled="${!pagina.hasPrevious()}"
+                th:attr="data-pagina=${pagina.number - 1}"
+                onclick="cambiarPagina(this.dataset.pagina)">
+            &larr;
+        </button>
+
+        <span th:text="|Pagina ${pagina.number + 1} de ${pagina.totalPages}|">
+        </span>
+
+        <button type="button"
+                title="Pagina siguiente"
+                aria-label="Pagina siguiente"
+                th:disabled="${!pagina.hasNext()}"
+                th:attr="data-pagina=${pagina.number + 1}"
+                onclick="cambiarPagina(this.dataset.pagina)">
+            &rarr;
+        </button>
+    </nav>
+
+    <a class="volver"
+       th:href="@{/}">
+        Inicio
+    </a>
+
+    <a class="volver"
+       th:href="@{/categorias}">
+        Ir a categorías
+    </a>
+
+    <a class="volver"
+       th:href="@{/productos/stock-bajo}">
+        Ver productos con stock bajo
+    </a>
+
+</div>
+
+<script>
+    function cambiarPagina(numeroPagina) {
+        const url = new URL(window.location.href);
+        url.searchParams.set("pagina", numeroPagina);
+        window.location.assign(url.toString());
+    }
+</script>
+
+</body>
+</html>

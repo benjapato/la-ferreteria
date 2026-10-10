@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Reporte de caja | La Ferretería</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 35px;
+            background-color: #f4f4f4;
+            color: #222;
+            font-family: Arial, sans-serif;
+        }
+
+        .contenedor {
+            width: 100%;
+            max-width: 1450px;
+            margin: auto;
+            padding: 28px;
+            border-radius: 10px;
+            background-color: white;
+        }
+
+        .encabezado {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .encabezado h1 {
+            margin: 0;
+        }
+
+        .encabezado p {
+            margin: 7px 0 0;
+            color: #666;
+        }
+
+        .navegacion-superior {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .boton {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            padding: 0 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .boton-principal {
+            background-color: #333;
+            color: white;
+        }
+
+        .boton-secundario {
+            background-color: #e5e5e5;
+            color: #333;
+        }
+
+        .filtros {
+            display: flex;
+            align-items: end;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 22px;
+            padding: 14px;
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+
+        .campo {
+            flex: 0 1 220px;
+        }
+
+        .campo label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .campo input {
+            width: 100%;
+            height: 40px;
+            padding: 0 11px;
+            border: 1px solid #c8c8c8;
+            border-radius: 6px;
+            background-color: white;
+            font-size: 14px;
+        }
+
+        .campo input:focus {
+            border-color: #2563eb;
+            outline: 2px solid rgba(37, 99, 235, 0.12);
+        }
+
+        .error {
+            margin-top: 16px;
+            padding: 12px 14px;
+            border-radius: 6px;
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .aclaracion {
+            margin-top: 14px;
+            padding: 11px 13px;
+            border-radius: 6px;
+            background-color: #dbeafe;
+            color: #1e3a8a;
+            font-size: 13px;
+        }
+
+        .resumen {
+            display: grid;
+            grid-template-columns:
+                repeat(4, minmax(190px, 1fr));
+            gap: 13px;
+            margin-top: 22px;
+        }
+
+        .tarjeta {
+            padding: 18px;
+            border: 1px solid #e3e3e3;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+
+        .tarjeta strong {
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+            font-size: 13px;
+        }
+
+        .valor {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .valor-total {
+            color: #166534;
+        }
+
+        .contadores {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+            margin-top: 13px;
+        }
+
+        .contador {
+            padding: 7px 11px;
+            border-radius: 20px;
+            background-color: #eee;
+            color: #444;
+            font-size: 13px;
+        }
+
+        .desglose {
+            display: grid;
+            grid-template-columns:
+                repeat(2, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 22px;
+        }
+
+        .panel {
+            padding: 18px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .panel h2 {
+            margin: 0 0 12px;
+            font-size: 19px;
+        }
+
+        .fila-total {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 9px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .fila-total:last-child {
+            border-bottom: none;
+        }
+
+        .fila-destacada {
+            margin-top: 8px;
+            padding: 11px;
+            border-radius: 6px;
+            background-color: #d1e7dd;
+            color: #0f5132;
+            font-weight: bold;
+        }
+
+        .fila-informativa {
+            color: #7c5c00;
+        }
+
+        .seccion-tabla {
+            margin-top: 28px;
+        }
+
+        .seccion-tabla h2 {
+            margin-bottom: 5px;
+        }
+
+        .seccion-tabla > p {
+            margin-top: 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .tabla-contenedor {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid #e2e2e2;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            min-width: 950px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 11px;
+            border-bottom: 1px solid #e4e4e4;
+            text-align: left;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+            font-size: 13px;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background-color: #fafafa;
+        }
+
+        .dinero {
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .diferencia-negativa {
+            color: #b91c1c;
+        }
+
+        .diferencia-positiva {
+            color: #166534;
+        }
+
+        .estado {
+            display: inline-block;
+            min-width: 80px;
+            padding: 5px 8px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .estado-abierta {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .estado-cerrada {
+            background-color: #e7e7e7;
+            color: #444;
+        }
+
+        .etiqueta-cuenta {
+            display: inline-block;
+            padding: 4px 7px;
+            border-radius: 5px;
+            background-color: #fff3cd;
+            color: #664d03;
+            font-size: 12px;
+        }
+
+        .ver {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 5px;
+            background-color: #dbeafe;
+            color: #1e3a8a;
+            text-decoration: none;
+        }
+
+        .sin-datos {
+            padding: 28px;
+            color: #666;
+            text-align: center;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+                background-color: white;
+            }
+
+            .contenedor {
+                max-width: none;
+                padding: 0;
+            }
+
+            .navegacion-superior,
+            .filtros,
+            .boton-imprimir {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 1000px) {
+            .resumen {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 750px) {
+            body {
+                padding: 15px;
+            }
+
+            .contenedor {
+                padding: 20px;
+            }
+
+            .resumen,
+            .desglose {
+                grid-template-columns: 1fr;
+            }
+
+            .campo {
+                flex: 1 1 100%;
+            }
+
+            .filtros .boton {
+                flex: 1;
+            }
+        }
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <div class="encabezado">
+
+        <div>
+            <h1>Reporte de caja</h1>
+
+            <p>
+                Ingresos por ventas y pagos de clientes
+                entre dos fechas.
+            </p>
+        </div>
+
+        <div class="navegacion-superior">
+
+            <a class="boton boton-secundario"
+               th:href="@{/}">
+                Inicio
+            </a>
+
+            <button type="button"
+                    class="boton boton-secundario boton-imprimir"
+                    onclick="window.print()">
+                Imprimir
+            </button>
+
+            <a class="boton boton-secundario"
+               th:href="@{/caja}">
+                Volver a caja
+            </a>
+
+        </div>
+
+    </div>
+
+    <form class="filtros"
+          th:action="@{/reportes/caja}"
+          method="get">
+
+        <div class="campo">
+
+            <label for="desde">
+                Fecha desde
+            </label>
+
+            <input id="desde"
+                   type="date"
+                   name="desde"
+                   th:value="${desde}"
+                   required>
+
+        </div>
+
+        <div class="campo">
+
+            <label for="hasta">
+                Fecha hasta
+            </label>
+
+            <input id="hasta"
+                   type="date"
+                   name="hasta"
+                   th:value="${hasta}"
+                   required>
+
+        </div>
+
+        <button type="submit"
+                class="boton boton-principal">
+            Generar reporte
+        </button>
+
+    </form>
+
+    <div th:if="${error}"
+         class="error"
+         th:text="${error}">
+    </div>
+
+    <div th:if="${reporte != null}">
+
+        <div class="aclaracion">
+
+            Las ventas a cuenta corriente se muestran
+            como ventas facturadas, pero no se suman al
+            dinero ingresado en caja hasta que el cliente
+            paga. Los pagos anulados tampoco se incluyen.
+
+        </div>
+
+        <!-- Resumen principal -->
+
+        <div class="resumen">
+
+            <div class="tarjeta">
+
+                <strong>
+                    Ingresos por ventas
+                </strong>
+
+                <span class="valor">
+
+                    $
+
+                    <span th:text="${#numbers.formatDecimal(
+                        reporte.totalIngresosVentas(),
+                        1,
+                        'POINT',
+                        2,
+                        'COMMA'
+                    )}">
+                    </span>
+
+                </span>
+
+            </div>
+
+            <div class="tarjeta">
+
+                <strong>
+                    Pagos de clientes
+                </strong>
+
+                <span class="valor">
+
+                    $
+
+                    <span th:text="${#numbers.formatDecimal(
+                        reporte.totalPagosClientes(),
+                        1,
+                        'POINT',
+                        2,
+                        'COMMA'
+                    )}">
+                    </span>
+
+                </span>
+
+            </div>
+
+            <div class="tarjeta">
+
+                <strong>
+                    Total ingresado en caja
+                </strong>
+
+                <span class="valor valor-total">
+
+                    $
+
+                    <span th:text="${#numbers.formatDecimal(
+                        reporte.totalGeneral(),
+                        1,
+                        'POINT',
+                        2,
+                        'COMMA'
+                    )}">
+                    </span>
+
+                </span>
+
+            </div>
+
+            <div class="tarjeta">
+
+                <strong>
+                    Total de ventas facturadas
+                </strong>
+
+                <span class="valor">
+
+                    $
+
+                    <span th:text="${#numbers.formatDecimal(
+                        reporte.totalVentasFacturadas(),
+                        1,
+                        'POINT',
+                        2,
+                        'COMMA'
+                    )}">
+                    </span>
+
+                </span>
+
+            </div>
+
+        </div>
+
+        <!-- Cantidades -->
+
+        <div class="contadores">
+
+            <span class="contador">
+
+                Ventas:
+
+                <strong th:text="${reporte.cantidadVentas()}">
+                    0
+                </strong>
+
+            </span>
+
+            <span class="contador">
+
+                Pagos:
+
+                <strong th:text="${reporte.cantidadPagosClientes()}">
+                    0
+                </strong>
+
+            </span>
+
+            <span class="contador">
+
+                Cajas del período:
+
+                <strong th:text="${reporte.cantidadCajas()}">
+                    0
+                </strong>
+
+            </span>
+
+            <span class="contador">
+
+                Abiertas:
+
+                <strong th:text="${reporte.cajasAbiertas()}">
+                    0
+                </strong>
+
+            </span>
+
+            <span class="contador">
+
+                Cerradas:
+
+                <strong th:text="${reporte.cajasCerradas()}">
+                    0
+                </strong>
+
+            </span>
+
+        </div>
+
+        <!-- Desglose -->
+
+        <div class="desglose">
+
+            <section class="panel">
+
+                <h2>
+                    Ventas por forma de pago
+                </h2>
+
+                <div class="fila-total">
+
+                    <span>Efectivo</span>
+
+                    <strong th:text="${'$ ' +
+                        #numbers.formatDecimal(
+                            reporte.ventasEfectivo(),
+                            1,
+                            'POINT',
+                            2,
+                            'COMMA'
+                        )}">
+                    </strong>
+
+                </div>
+
+                <div class="fila-total">
+
+                    <span>Transferencia</span>
+
+                    <strong th:text="${'$ ' +
+                        #numbers.formatDecimal(
+                            reporte.ventasTransferencia(),
+                            1,
+                            'POINT',
+                            2,
+                            'COMMA'
+                        )}">
+                    </strong>
+
+                </div>
+
+                <div class="fila-total">
+
+                    <span>Tarjeta de débito</span>
+
+                    <strong th:text="${'$ ' +
+                        #numbers.formatDecimal(
+                            reporte.ventasTarjetaDebito(),
+                            1,
+                            'POINT',
+                            2,
+                            'COMMA'
+                        )}">
+                    </strong>
+
+                </div>
+
+                <div class="fila-total">
+
+                    <span>Tarjeta de crédito</span>
+
+                    <strong th:text="${'$ ' +
+                        #numbers.formatDecimal(
+                            reporte.ventasTarjetaCredito(),
+                            1,
+                            'POINT',
+                            2,
+                            'COMMA'
+                        )}">
+                    </strong>
+
+                </div>
+
+                <div class="fila-total fila-informativa">
+
+                    <span>Cuenta corriente</span>
+
+                    <strong th:text="${'$ ' +
+                        #numbers.formatDecimal(
+                            reporte.ventasCuentaCorriente(),
+                            1,
+                            'POINT',
+                            2,
+                            'COMMA'
+                        )}">
+                    </strong>
+
+                </div>
+
+                <div class="fila-total fila-destacada">
+
+                    <span>
+                        Ingreso real por ventas
+                    </span>
+
+                    <strong th:text="${'$ ' +
+                        #numbers.formatDecimal(
+                            reporte.totalIngresosVentas(),
+                            1,
+                            'POINT',
+                            2,
+                            'COMMA'
+                        )}">
+                    </strong>
+
+                </div>
+
+            </section>
+
+            <section class="panel">
+
+                <h2>
+                    Pagos de clientes por medio
+                </h2>
+
+                <div class="fila-total">
+
+                    <span>Efectivo</span>
+
+                    <strong th:text="${'$ ' +
+                        #numbers.formatDecimal(
+                            reporte.pagosClientesEfectivo(),
+                            1,
+                            'POINT',
+                            2,
+                            'COMMA'
+                        )}">
+                    </strong>
+
+                </div>
+
+                <div class="fila-total">
+
+                    <span>Transferencia</span>
+
+                    <strong th:text="${'$ ' +
+                        #numbers.formatDecimal(
+                            reporte.pagosClientesTransferencia(),
+                            1,
+                            'POINT',
+                            2,
+                            'COMMA'
+                        )}">
+                    </strong>
+
+                </div>
+
+                <div class="fila-total">
+
+                    <span>Tarjeta de débito</span>
+
+                    <strong th:text="${'$ ' +
+                        #numbers.formatDecimal(
+                            reporte.pagosClientesTarjetaDebito(),
+                            1,
+                            'POINT',
+                            2,
+                            'COMMA'
+                        )}">
+                    </strong>
+
+                </div>
+
+                <div class="fila-total">
+
+                    <span>Tarjeta de crédito</span>
+
+                    <strong th:text="${'$ ' +
+                        #numbers.formatDecimal(
+                            reporte.pagosClientesTarjetaCredito(),
+                            1,
+                            'POINT',
+                            2,
+                            'COMMA'
+                        )}">
+                    </strong>
+
+                </div>
+
+                <div class="fila-total">
+
+                    <span>Otro</span>
+
+                    <strong th:text="${'$ ' +
+                        #numbers.formatDecimal(
+                            reporte.pagosClientesOtro(),
+                            1,
+                            'POINT',
+                            2,
+                            'COMMA'
+                        )}">
+                    </strong>
+
+                </div>
+
+                <div class="fila-total fila-destacada">
+
+                    <span>Total de pagos</span>
+
+                    <strong th:text="${'$ ' +
+                        #numbers.formatDecimal(
+                            reporte.totalPagosClientes(),
+                            1,
+                            'POINT',
+                            2,
+                            'COMMA'
+                        )}">
+                    </strong>
+
+                </div>
+
+            </section>
+
+        </div>
+
+        <!-- Cajas -->
+
+        <section class="seccion-tabla">
+
+            <h2>Cajas del período</h2>
+
+            <p>
+                Se incluyen las cajas cuya fecha de apertura
+                está dentro del rango seleccionado.
+            </p>
+
+            <div class="tabla-contenedor">
+
+                <table>
+
+                    <thead>
+                    <tr>
+                        <th>N.º</th>
+                        <th>Apertura</th>
+                        <th>Cierre</th>
+                        <th>Estado</th>
+                        <th>Total ventas</th>
+                        <th>Pagos de clientes</th>
+                        <th>Total general</th>
+                        <th>Efectivo esperado</th>
+                        <th>Contado</th>
+                        <th>Diferencia</th>
+                        <th>Detalle</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:each="caja : ${reporte.cajas()}">
+
+                        <td th:text="${caja.id}">
+                        </td>
+
+                        <td th:text="${#temporals.format(
+                            caja.fechaApertura,
+                            'dd/MM/yyyy HH:mm'
+                        )}">
+                        </td>
+
+                        <td th:text="${caja.fechaCierre == null
+                            ? '-'
+                            : #temporals.format(
+                                caja.fechaCierre,
+                                'dd/MM/yyyy HH:mm'
+                            )}">
+                        </td>
+
+                        <td>
+
+                            <span class="estado"
+                                  th:classappend="${caja.estado.name()
+                                    == 'ABIERTA'
+                                    ? ' estado-abierta'
+                                    : ' estado-cerrada'}"
+                                  th:text="${caja.estado}">
+                            </span>
+
+                        </td>
+
+                        <td class="dinero"
+                            th:text="${'$ ' +
+                                #numbers.formatDecimal(
+                                    caja.totalVentas,
+                                    1,
+                                    'POINT',
+                                    2,
+                                    'COMMA'
+                                )}">
+                        </td>
+
+                        <td class="dinero"
+                            th:text="${'$ ' +
+                                #numbers.formatDecimal(
+                                    caja.totalPagosClientes,
+                                    1,
+                                    'POINT',
+                                    2,
+                                    'COMMA'
+                                )}">
+                        </td>
+
+                        <td class="dinero"
+                            th:text="${'$ ' +
+                                #numbers.formatDecimal(
+                                    caja.totalGeneral,
+                                    1,
+                                    'POINT',
+                                    2,
+                                    'COMMA'
+                                )}">
+                        </td>
+
+                        <td class="dinero"
+                            th:text="${'$ ' + #numbers.formatDecimal(
+                                caja.efectivoEsperado == null
+                                    ? 0 : caja.efectivoEsperado,
+                                1, 'POINT', 2, 'COMMA'
+                            )}"></td>
+
+                        <td class="dinero"
+                            th:text="${caja.efectivoContado == null
+                                ? '-'
+                                : '$ ' + #numbers.formatDecimal(
+                                    caja.efectivoContado,
+                                    1, 'POINT', 2, 'COMMA'
+                                )}"></td>
+
+                        <td class="dinero"
+                            th:text="${caja.diferenciaEfectivo == null
+                                ? '-'
+                                : '$ ' + #numbers.formatDecimal(
+                                    caja.diferenciaEfectivo,
+                                    1, 'POINT', 2, 'COMMA'
+                                )}"
+                            th:classappend="${caja.diferenciaEfectivo == null
+                                ? ''
+                                : caja.diferenciaEfectivo.signum() < 0
+                                    ? ' diferencia-negativa'
+                                    : caja.diferenciaEfectivo.signum() > 0
+                                        ? ' diferencia-positiva' : ''}"></td>
+
+                        <td>
+
+                            <a class="ver"
+                               th:href="@{/caja/detalle/{id}(
+                                    id=${caja.id}
+                               )}">
+                                Ver
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(
+                            reporte.cajas()
+                        )}">
+
+                        <td colspan="11"
+                            class="sin-datos">
+                            No se abrieron cajas en el período
+                            seleccionado.
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        <!-- Ventas -->
+
+        <section class="seccion-tabla">
+
+            <h2>Ventas confirmadas</h2>
+
+            <p>
+                Detalle de las ventas registradas
+                dentro del período.
+            </p>
+
+            <div class="tabla-contenedor">
+
+                <table>
+
+                    <thead>
+                    <tr>
+                        <th>N.º</th>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Forma de pago</th>
+                        <th>Total facturado</th>
+                        <th>Ingreso en caja</th>
+                        <th>Detalle</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:each="venta : ${reporte.ventas()}">
+
+                        <td th:text="${venta.id}">
+                        </td>
+
+                        <td th:text="${#temporals.format(
+                            venta.fecha,
+                            'dd/MM/yyyy HH:mm'
+                        )}">
+                        </td>
+
+                        <td th:text="${#strings.isEmpty(
+                                venta.nombreCliente
+                            )
+                            ? 'Consumidor final'
+                            : venta.nombreCliente}">
+                        </td>
+
+                        <td>
+
+                            <span th:if="${venta.formaPago.name()
+                                    == 'CUENTA_CORRIENTE'}"
+                                  class="etiqueta-cuenta">
+                                Cuenta corriente
+                            </span>
+
+                            <span th:if="${venta.formaPago.name()
+                                    != 'CUENTA_CORRIENTE'}"
+                                  th:text="${#strings.replace(
+                                    venta.formaPago.name(),
+                                    '_',
+                                    ' '
+                                  )}">
+                            </span>
+
+                        </td>
+
+                        <td class="dinero"
+                            th:text="${'$ ' +
+                                #numbers.formatDecimal(
+                                    venta.total,
+                                    1,
+                                    'POINT',
+                                    2,
+                                    'COMMA'
+                                )}">
+                        </td>
+
+                        <td class="dinero">
+
+                            <span th:if="${venta.formaPago.name()
+                                    == 'CUENTA_CORRIENTE'}">
+                                $ 0,00
+                            </span>
+
+                            <span th:if="${venta.formaPago.name()
+                                    != 'CUENTA_CORRIENTE'}"
+                                  th:text="${'$ ' +
+                                    #numbers.formatDecimal(
+                                        venta.total,
+                                        1,
+                                        'POINT',
+                                        2,
+                                        'COMMA'
+                                    )}">
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            <a class="ver"
+                               th:href="@{/ventas/detalle/{id}(
+                                    id=${venta.id}
+                               )}">
+                                Ver
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(
+                            reporte.ventas()
+                        )}">
+
+                        <td colspan="7"
+                            class="sin-datos">
+                            No hay ventas confirmadas en el
+                            período seleccionado.
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        <!-- Pagos -->
+
+        <section class="seccion-tabla">
+
+            <h2>Pagos de clientes</h2>
+
+            <p>
+                Se muestran únicamente pagos vigentes.
+                Los pagos anulados están excluidos.
+            </p>
+
+            <div class="tabla-contenedor">
+
+                <table>
+
+                    <thead>
+                    <tr>
+                        <th>N.º</th>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Medio de pago</th>
+                        <th>Monto</th>
+                        <th>Observación</th>
+                        <th>Cuenta corriente</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:each="pago :
+                            ${reporte.pagosClientes()}">
+
+                        <td th:text="${pago.id}">
+                        </td>
+
+                        <td th:text="${#temporals.format(
+                            pago.fecha,
+                            'dd/MM/yyyy HH:mm'
+                        )}">
+                        </td>
+
+                        <td th:text="${pago.cliente.nombre}">
+                        </td>
+
+                        <td th:text="${#strings.replace(
+                            pago.medioPago.name(),
+                            '_',
+                            ' '
+                        )}">
+                        </td>
+
+                        <td class="dinero"
+                            th:text="${'$ ' +
+                                #numbers.formatDecimal(
+                                    pago.monto,
+                                    1,
+                                    'POINT',
+                                    2,
+                                    'COMMA'
+                                )}">
+                        </td>
+
+                        <td th:text="${#strings.isEmpty(
+                                pago.observacion
+                            )
+                            ? '-'
+                            : pago.observacion}">
+                        </td>
+
+                        <td>
+
+                            <a class="ver"
+                               th:href="@{/clientes/detalle/{id}(
+                                    id=${pago.cliente.id}
+                               )}">
+                                Ver cliente
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(
+                            reporte.pagosClientes()
+                        )}">
+
+                        <td colspan="7"
+                            class="sin-datos">
+                            No hay pagos vigentes en el
+                            período seleccionado.
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
+
+</body>
+</html>

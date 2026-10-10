@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Nueva categoría | La Ferretería</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .contenedor {
+            max-width: 600px;
+            margin: auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        label {
+            display: block;
+            margin-top: 20px;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .acciones {
+            margin-top: 25px;
+        }
+
+        button,
+        .volver {
+            display: inline-block;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        button {
+            background-color: #333;
+            color: white;
+        }
+
+        .volver {
+            background-color: #ddd;
+            color: #333;
+            margin-left: 8px;
+        }
+
+        .error {
+            color: red;
+            margin-top: 5px;
+        }
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <h1 th:text="${categoria.id == null}
+        ? 'Nueva categoría'
+        : 'Editar categoría'">
+    </h1>
+
+    <div th:if="${error}" class="error" th:text="${error}"></div>
+
+    <form th:action="${categoria.id == null}
+        ? @{/categorias/guardar}
+        : @{/categorias/actualizar/{id}(id=${categoria.id})}"
+          th:object="${categoria}"
+          method="post">
+
+        <label for="nombre">Nombre</label>
+
+        <input id="nombre"
+               type="text"
+               th:field="*{nombre}">
+
+        <div class="error"
+             th:if="${#fields.hasErrors('nombre')}"
+             th:errors="*{nombre}">
+        </div>
+
+        <label for="descripcion">Descripción</label>
+
+        <textarea id="descripcion"
+                  th:field="*{descripcion}">
+        </textarea>
+
+        <div class="error"
+             th:if="${#fields.hasErrors('descripcion')}"
+             th:errors="*{descripcion}">
+        </div>
+
+        <div class="acciones">
+            <a class="volver"
+               th:href="@{/}">
+                Inicio
+            </a>
+
+            <button type="submit"
+                    th:text="${categoria.id == null}
+            ? 'Guardar categoría'
+            : 'Actualizar categoría'">
+            </button>
+
+            <a class="volver"
+               th:href="@{/categorias}">
+                Volver
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>

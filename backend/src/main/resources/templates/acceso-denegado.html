@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Acceso denegado | La Ferretería</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            color: #222;
+        }
+
+        .panel {
+            width: 100%;
+            max-width: 600px;
+            padding: 34px;
+            border-radius: 10px;
+            background-color: white;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #842029;
+        }
+
+        p {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .acciones {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .boton {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 41px;
+            padding: 0 17px;
+            border-radius: 6px;
+            background-color: #333;
+            color: white;
+            text-decoration: none;
+        }
+
+        .secundario {
+            background-color: #ddd;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+
+<main class="panel">
+
+    <h1>Acceso denegado</h1>
+
+    <p>
+        Tu usuario no tiene permiso para ingresar a esta sección.
+        Las compras, proveedores, reportes, caja, ajustes y usuarios
+        están reservados para administradores.
+    </p>
+
+    <div class="acciones">
+        <a class="boton"
+           th:href="@{/}">
+            Inicio
+        </a>
+
+        <a class="boton secundario"
+           th:href="@{/ventas/nueva}">
+            Registrar venta
+        </a>
+    </div>
+
+</main>
+
+</body>
+</html>

@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Copias de seguridad | La Ferretería</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 35px;
+            background-color: #f4f4f4;
+            color: #222;
+            font-family: Arial, sans-serif;
+        }
+
+        .contenedor {
+            width: 100%;
+            max-width: 1200px;
+            margin: auto;
+            padding: 28px;
+            border-radius: 10px;
+            background-color: white;
+        }
+
+        .encabezado {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        .subtitulo {
+            margin: 8px 0 0;
+            color: #666;
+        }
+
+        .acciones-superiores {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .boton {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            padding: 0 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .boton-crear {
+            background-color: #166534;
+            color: white;
+        }
+
+        .boton-crear:hover {
+            background-color: #15803d;
+        }
+
+        .boton-volver {
+            background-color: #e5e5e5;
+            color: #333;
+        }
+
+        .mensaje,
+        .error {
+            margin-top: 18px;
+            padding: 13px;
+            border-radius: 6px;
+        }
+
+        .mensaje {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .aviso {
+            margin-top: 22px;
+            padding: 16px;
+            border-radius: 8px;
+            background-color: #fff3cd;
+            color: #664d03;
+            line-height: 1.5;
+        }
+
+        .ubicacion {
+            margin-top: 14px;
+            padding: 12px;
+            border-radius: 6px;
+            background-color: #eef2f7;
+            color: #344054;
+            word-break: break-all;
+        }
+
+        .tabla-contenedor {
+            width: 100%;
+            margin-top: 24px;
+            overflow-x: auto;
+            border: 1px solid #e2e2e2;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            min-width: 850px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e4e4e4;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background-color: #fafafa;
+        }
+
+        .acciones {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .acciones form {
+            margin: 0;
+        }
+
+        .descargar,
+        .eliminar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 34px;
+            padding: 0 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 13px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .descargar {
+            background-color: #dbeafe;
+            color: #1e3a8a;
+        }
+
+        .eliminar {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .sin-datos {
+            padding: 35px;
+            color: #666;
+            text-align: center;
+        }
+
+        .instrucciones {
+            margin-top: 27px;
+            padding: 21px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+
+        .instrucciones h2 {
+            margin-top: 0;
+        }
+
+        .instrucciones ol {
+            padding-left: 22px;
+            line-height: 1.7;
+        }
+
+        .codigo {
+            display: block;
+            margin-top: 8px;
+            padding: 12px;
+            border-radius: 6px;
+            background-color: #222;
+            color: white;
+            overflow-x: auto;
+            white-space: nowrap;
+            font-family: Consolas, monospace;
+        }
+
+        @media (max-width: 650px) {
+            body {
+                padding: 12px;
+            }
+
+            .contenedor {
+                padding: 18px;
+            }
+
+            .acciones-superiores,
+            .acciones-superiores .boton,
+            .acciones-superiores form {
+                width: 100%;
+            }
+        }
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <div class="encabezado">
+
+        <div>
+            <h1>Copias de seguridad</h1>
+
+            <p class="subtitulo">
+                Guardá una copia completa de la base de datos
+                PostgreSQL de La Ferretería.
+            </p>
+        </div>
+
+        <div class="acciones-superiores">
+
+            <a class="boton boton-volver"
+               th:href="@{/}">
+                Inicio
+            </a>
+
+            <form th:action="@{/copias-seguridad/crear}"
+                  method="post"
+                  onsubmit="return confirmarCreacion()">
+
+                <button type="submit"
+                        class="boton boton-crear">
+                    Crear copia ahora
+                </button>
+            </form>
+
+        </div>
+
+    </div>
+
+    <div th:if="${mensaje}"
+         class="mensaje"
+         th:text="${mensaje}">
+    </div>
+
+    <div th:if="${error}"
+         class="error"
+         th:text="${error}">
+    </div>
+
+    <div class="aviso">
+        <strong>Importante:</strong>
+        después de crear una copia, descargala y guardala
+        también en un pendrive, otra computadora o almacenamiento
+        en la nube. Una copia ubicada solamente en esta misma PC
+        puede perderse si el disco se daña.
+    </div>
+
+    <div th:if="${directorioCopias != null}"
+         class="ubicacion">
+        <strong>Carpeta local:</strong>
+        <span th:text="${directorioCopias}">
+        </span>
+    </div>
+
+    <div class="ubicacion">
+        <strong>Backup diario:</strong>
+        <span th:if="${copiasAutomaticasHabilitadas}">
+            activo, todos los dias a las 18:00.
+        </span>
+        <span th:unless="${copiasAutomaticasHabilitadas}">
+            desactivado.
+        </span>
+    </div>
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+            <tr>
+                <th>Archivo</th>
+                <th>Fecha y hora</th>
+                <th>Tamaño</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="copia : ${copias}">
+
+                <td th:text="${copia.nombre()}">
+                </td>
+
+                <td th:text="${#temporals.format(
+                    copia.fechaModificacion(),
+                    'dd/MM/yyyy HH:mm:ss'
+                )}">
+                </td>
+
+                <td th:text="${copia.tamanioLegible()}">
+                </td>
+
+                <td>
+                    <div class="acciones">
+
+                        <a class="descargar"
+                           th:href="@{/copias-seguridad/descargar/{nombre}(
+                                nombre=${copia.nombre()}
+                           )}">
+                            Descargar
+                        </a>
+
+                        <form th:action="@{/copias-seguridad/eliminar/{nombre}(
+                                  nombre=${copia.nombre()}
+                              )}"
+                              method="post"
+                              onsubmit="return confirm(
+                                '¿Eliminar definitivamente esta copia?'
+                              )">
+
+                            <button type="submit"
+                                    class="eliminar">
+                                Eliminar
+                            </button>
+                        </form>
+
+                    </div>
+                </td>
+
+            </tr>
+
+            <tr th:if="${copias == null or #lists.isEmpty(copias)}">
+                <td colspan="4"
+                    class="sin-datos">
+                    Todavía no hay copias de seguridad.
+                </td>
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <section class="instrucciones">
+
+        <h2>Cómo restaurar una copia</h2>
+
+        <ol>
+            <li>
+                Detené la aplicación desde IntelliJ.
+            </li>
+
+            <li>
+                Abrí una terminal de Windows como administrador.
+            </li>
+
+            <li>
+                Ejecutá el siguiente comando, reemplazando
+                <strong>ARCHIVO.backup</strong> por la ruta real
+                del archivo descargado:
+
+                <code class="codigo">&quot;C:\Program Files\PostgreSQL\18\bin\pg_restore.exe&quot; --host localhost --port 5432 --username postgres --clean --if-exists --no-owner --dbname LaFerreteria &quot;C:\ruta\ARCHIVO.backup&quot;</code>
+            </li>
+
+            <li>
+                Cuando PostgreSQL pida la contraseña,
+                ingresá la contraseña del usuario postgres.
+            </li>
+
+            <li>
+                Al finalizar, iniciá nuevamente la aplicación.
+            </li>
+        </ol>
+
+        <p>
+            La restauración reemplaza los datos actuales por los
+            guardados en la copia seleccionada. Antes de restaurar,
+            conviene crear una copia del estado actual.
+        </p>
+
+    </section>
+
+</div>
+
+<script>
+    function confirmarCreacion() {
+        return confirm(
+            "¿Crear una copia completa de la base de datos ahora?"
+        );
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Inicio | La Ferretería</title>
+
+    <style>
+        :root {
+            --fondo: #f6f7f9;
+            --superficie: #ffffff;
+            --texto: #1d252b;
+            --texto-suave: #65717c;
+            --borde: #e1e5e8;
+            --oscuro: #1b2328;
+            --verde: #168052;
+            --verde-claro: #e8f4ed;
+            --azul: #245ea8;
+            --azul-claro: #eaf1fb;
+            --ambar: #9a5b0a;
+            --ambar-claro: #fff4df;
+            --rojo: #b42318;
+            --rojo-claro: #ffebe9;
+            --panel-abierto: 310px;
+            --panel-cerrado: 64px;
+            --alto-cabecera: 68px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--fondo);
+            color: var(--texto);
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        body.con-panel .contenedor {
+            width: min(
+                calc(100% - var(--panel-cerrado)),
+                1360px
+            );
+            margin-left: max(
+                var(--panel-cerrado),
+                calc(
+                    var(--panel-cerrado)
+                    + (
+                        100vw
+                        - var(--panel-cerrado)
+                        - 1360px
+                    ) / 2
+                )
+            );
+            margin-right: 0;
+            transition: width 210ms ease,
+                        margin-left 210ms ease;
+        }
+
+        body.con-panel.panel-expandido .contenedor {
+            width: min(
+                calc(100% - var(--panel-abierto)),
+                1360px
+            );
+            margin-left: max(
+                var(--panel-abierto),
+                calc(
+                    var(--panel-abierto)
+                    + (
+                        100vw
+                        - var(--panel-abierto)
+                        - 1360px
+                    ) / 2
+                )
+            );
+        }
+
+        @media (min-width: 761px) {
+            body.con-panel:has(.panel-lateral:hover) .contenedor {
+                width: min(
+                    calc(100% - var(--panel-abierto)),
+                    1360px
+                );
+                margin-left: max(
+                    var(--panel-abierto),
+                    calc(
+                        var(--panel-abierto)
+                        + (
+                            100vw
+                            - var(--panel-abierto)
+                            - 1360px
+                        ) / 2
+                    )
+                );
+            }
+
+            .panel-lateral:hover {
+                width: var(--panel-abierto);
+            }
+
+            .panel-lateral:not(.abierto):hover::before {
+                display: none;
+            }
+
+            .panel-lateral:not(.abierto):hover
+            .panel-lateral-cabecera {
+                display: flex;
+            }
+
+            .panel-lateral:not(.abierto):hover
+            .navegacion-lateral {
+                display: block;
+            }
+        }
+
+        button,
+        a {
+            font: inherit;
+        }
+
+        .barra-superior {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            min-height: 68px;
+            padding: 11px 28px;
+            background: var(--oscuro);
+            color: white;
+            border-bottom: 3px solid var(--verde);
+            box-shadow: 0 3px 12px rgba(23, 31, 38, 0.16);
+        }
+
+        .marca {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .marca-sello {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border: 1px solid #4b5a64;
+            border-radius: 8px;
+            background: #273138;
+            color: #bce5ce;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .marca-texto {
+            min-width: 0;
+        }
+
+        .marca h1 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .marca p {
+            margin: 4px 0 0;
+            color: #bdc4cc;
+            font-size: 13px;
+        }
+
+        .usuario-superior {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .datos-usuario {
+            text-align: right;
+        }
+
+        .datos-usuario strong,
+        .datos-usuario span {
+            display: block;
+        }
+
+        .datos-usuario span {
+            margin-top: 3px;
+            color: #bdc4cc;
+            font-size: 12px;
+        }
+
+        .cerrar-sesion-form,
+        .acciones-caja form {
+            margin: 0;
+        }
+
+        .cerrar-sesion {
+            min-height: 38px;
+            padding: 0 14px;
+            border: 1px solid #626b75;
+            border-radius: 6px;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+        }
+
+        .cerrar-sesion:hover {
+            background: #343b43;
+        }
+
+        .contenedor {
+            width: min(100%, 1360px);
+            margin: 0 auto;
+            padding: 26px 28px 45px;
+        }
+
+        .encabezado-pagina {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 22px;
+        }
+
+        .encabezado-pagina h2 {
+            margin: 0;
+            font-size: 27px;
+        }
+
+        .encabezado-pagina p {
+            margin: 6px 0 0;
+            color: var(--texto-suave);
+            font-size: 14px;
+        }
+
+        .mensaje,
+        .error {
+            margin-bottom: 18px;
+            padding: 13px 15px;
+            border: 1px solid;
+            border-radius: 6px;
+        }
+
+        .mensaje {
+            border-color: #badbcc;
+            background: var(--verde-claro);
+            color: #135c3a;
+        }
+
+        .error {
+            border-color: #f1b7b2;
+            background: var(--rojo-claro);
+            color: #842029;
+        }
+
+        .caja-estado {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 24px;
+            margin-bottom: 22px;
+            padding: 17px 19px;
+            border: 1px solid var(--borde);
+            border-left-width: 5px;
+            border-radius: 7px;
+            background: var(--superficie);
+            box-shadow: 0 4px 16px rgba(31, 41, 51, 0.05);
+        }
+
+        .caja-cerrada-inicio {
+            border-left-color: var(--ambar);
+        }
+
+        .caja-abierta-inicio {
+            border-left-color: var(--verde);
+        }
+
+        .caja-principal {
+            display: flex;
+            align-items: center;
+            flex: 1 1 340px;
+            flex-wrap: wrap;
+            gap: 10px 20px;
+            min-width: 280px;
+        }
+
+        .caja-principal h3 {
+            margin: 0;
+            font-size: 17px;
+        }
+
+        .caja-dato {
+            margin: 0;
+            color: var(--texto-suave);
+            font-size: 14px;
+        }
+
+        .caja-dato strong {
+            color: var(--texto);
+        }
+
+        .acciones-caja,
+        .acciones-seccion {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 9px;
+        }
+
+        .acciones-caja {
+            align-items: flex-end;
+            flex: 0 0 auto;
+            flex-wrap: nowrap;
+            margin-left: auto;
+        }
+
+        .formulario-caja-rapido {
+            display: flex;
+            align-items: end;
+            flex-wrap: wrap;
+            gap: 9px;
+        }
+
+        .campo-caja-rapido {
+            display: grid;
+            gap: 5px;
+            min-width: 155px;
+        }
+
+        .campo-caja-rapido label {
+            color: var(--texto-suave);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .campo-caja-rapido input {
+            width: 100%;
+            min-height: 40px;
+            padding: 8px 10px;
+            border: 1px solid #bcc4cd;
+            border-radius: 6px;
+            background: white;
+            color: var(--texto);
+            font: inherit;
+        }
+
+        .campo-caja-rapido input:focus {
+            border-color: var(--verde);
+            outline: 2px solid #bce7cf;
+            outline-offset: 1px;
+        }
+
+        .boton {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            padding: 0 15px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .boton-principal {
+            background: var(--verde);
+            color: white;
+        }
+
+        .boton-principal:hover {
+            background: #125f39;
+        }
+
+        .boton-secundario {
+            border-color: #bcc4cd;
+            background: white;
+            color: var(--texto);
+        }
+
+        .boton-secundario:hover {
+            background: #f2f4f6;
+        }
+
+        .boton-peligro {
+            border-color: #e1aaa6;
+            background: white;
+            color: var(--rojo);
+        }
+
+        .resumen {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .metrica {
+            min-height: 105px;
+            padding: 16px;
+            border: 1px solid var(--borde);
+            border-top: 4px solid #5e6873;
+            border-radius: 7px;
+            background: var(--superficie);
+            box-shadow: 0 5px 16px rgba(31, 41, 51, 0.06);
+        }
+
+        .metrica-ventas {
+            border-top-color: var(--azul);
+        }
+
+        .metrica-dinero,
+        .metrica-ganancia {
+            border-top-color: var(--verde);
+        }
+
+        .metrica-compras {
+            border-top-color: var(--ambar);
+        }
+
+        .metrica-stock {
+            border-top-color: var(--rojo);
+        }
+
+        .metrica > span {
+            display: block;
+            color: var(--texto-suave);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .metrica strong {
+            display: block;
+            margin-top: 15px;
+            font-size: 24px;
+        }
+
+        .seccion {
+            padding: 27px 0 30px;
+            border-top: 1px solid var(--borde);
+        }
+
+        .seccion:first-of-type {
+            border-top: 0;
+        }
+
+        .cabecera-seccion {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 18px;
+        }
+
+        .cabecera-seccion h2 {
+            margin: 0;
+            font-size: 21px;
+        }
+
+        .etiqueta-seccion {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--texto-suave);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .tabla-contenedor {
+            overflow-x: auto;
+            border: 1px solid var(--borde);
+            border-radius: 7px;
+            background: var(--superficie);
+            box-shadow: 0 4px 15px rgba(31, 41, 51, 0.04);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--borde);
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #f1f3f5;
+            color: #4b5560;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .enlace-tabla {
+            color: var(--azul);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .estado {
+            display: inline-block;
+            padding: 5px 8px;
+            border-radius: 5px;
+            background: var(--verde-claro);
+            color: #135c3a;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .estado-cancelada {
+            background: var(--rojo-claro);
+            color: var(--rojo);
+        }
+
+        .ganancia {
+            color: var(--verde);
+            font-weight: 700;
+        }
+
+        .sin-datos {
+            padding: 26px;
+            color: var(--texto-suave);
+            text-align: center;
+        }
+
+        .modulos {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .modulo {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            min-height: 74px;
+            padding: 17px;
+            border: 1px solid var(--borde);
+            border-radius: 8px;
+            background: var(--superficie);
+            color: var(--texto);
+            text-decoration: none;
+            font-weight: 700;
+            box-shadow: 0 4px 14px rgba(31, 41, 51, 0.04);
+            transition: border-color 160ms ease,
+                        background-color 160ms ease,
+                        transform 160ms ease;
+        }
+
+        .modulo:hover {
+            background: var(--azul-claro);
+            border-color: #bfd0e4;
+            color: #194c8e;
+            transform: translateY(-1px);
+        }
+
+        .modulo-indicador {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 27px;
+            min-height: 27px;
+            padding: 0 7px;
+            border-radius: 5px;
+            background: #edf0f3;
+            color: #4d5762;
+            font-size: 12px;
+        }
+
+        .modulo-indicador-alerta {
+            background: var(--rojo-claro);
+            color: var(--rojo);
+        }
+
+        .tablero-layout {
+            display: block;
+        }
+
+        .contenido-tablero {
+            min-width: 0;
+        }
+
+        .grupo-administracion h2 {
+            margin: 0 0 16px;
+            font-size: 21px;
+        }
+
+        .lista-enlaces {
+            border-top: 1px solid var(--borde);
+        }
+
+        .lista-enlaces a {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            min-height: 49px;
+            padding: 10px 4px;
+            border-bottom: 1px solid var(--borde);
+            color: var(--texto);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .lista-enlaces a:hover {
+            color: var(--azul);
+        }
+
+        .lista-enlaces .cantidad {
+            color: var(--texto-suave);
+            font-size: 13px;
+        }
+
+        .panel-stock {
+            overflow: hidden;
+            border: 1px solid var(--borde);
+            border-radius: 8px;
+            background: var(--superficie);
+            box-shadow: 0 4px 14px rgba(31, 41, 51, 0.06);
+        }
+
+        .panel-stock-cabecera {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 17px 19px;
+            border-bottom: 1px solid var(--borde);
+            background: #fffafa;
+        }
+
+        .panel-stock-cabecera h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .panel-stock-cabecera a {
+            color: var(--rojo);
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .fila-stock {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 90px 90px;
+            gap: 16px;
+            align-items: center;
+            min-height: 62px;
+            padding: 10px 19px;
+            border-bottom: 1px solid var(--borde);
+        }
+
+        .fila-stock:last-child {
+            border-bottom: 0;
+        }
+
+        .producto-stock {
+            min-width: 0;
+        }
+
+        .producto-stock strong,
+        .producto-stock span {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .producto-stock strong {
+            font-size: 14px;
+        }
+
+        .producto-stock span {
+            margin-top: 3px;
+            color: var(--texto-suave);
+            font-size: 13px;
+        }
+
+        .dato-stock {
+            text-align: right;
+        }
+
+        .dato-stock span,
+        .dato-stock strong {
+            display: block;
+        }
+
+        .dato-stock span {
+            color: var(--texto-suave);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .dato-stock strong {
+            margin-top: 4px;
+            font-size: 14px;
+        }
+
+        .dato-stock-actual strong {
+            color: var(--rojo);
+        }
+
+        .panel-superposicion {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 39;
+            background: rgba(16, 24, 30, 0.42);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 190ms ease;
+        }
+
+        .panel-superposicion.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .panel-lateral {
+            position: fixed;
+            top: var(--alto-cabecera);
+            bottom: 0;
+            left: 0;
+            z-index: 40;
+            width: var(--panel-cerrado);
+            overflow-y: auto;
+            background: var(--superficie);
+            color: var(--texto);
+            border-right: 1px solid var(--borde);
+            box-shadow: 8px 0 24px rgba(20, 29, 35, 0.1);
+            transition: width 210ms ease,
+                        transform 220ms ease;
+        }
+
+        .panel-lateral.abierto {
+            width: var(--panel-abierto);
+        }
+
+        .panel-lateral:not(.abierto) {
+            overflow: hidden;
+        }
+
+        .panel-lateral:not(.abierto)::before {
+            content: "☰";
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 62px;
+            color: var(--verde);
+            font-size: 22px;
+        }
+
+        .panel-lateral:not(.abierto) .panel-lateral-cabecera,
+        .panel-lateral:not(.abierto) .navegacion-lateral {
+            display: none;
+        }
+
+        .panel-lateral-cabecera {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 24px 22px 20px;
+            border-bottom: 1px solid var(--borde);
+            background: #f8faf9;
+        }
+
+        .panel-lateral-cabecera span {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--verde);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .panel-lateral-cabecera h2 {
+            margin: 0;
+            font-size: 21px;
+        }
+
+        .panel-lateral:focus-visible,
+        .boton:focus-visible,
+        .cerrar-sesion:focus-visible {
+            outline: 2px solid #66bd8c;
+            outline-offset: 2px;
+        }
+
+        .grupo-panel {
+            display: block;
+            padding: 20px 22px 8px;
+            color: var(--texto-suave);
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .navegacion-lateral a {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            min-height: 50px;
+            margin: 0 10px 4px;
+            padding: 10px 12px;
+            border-radius: 7px;
+            color: var(--texto);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .navegacion-lateral a:hover {
+            background: var(--verde-claro);
+            color: #12653f;
+        }
+
+        .navegacion-lateral a::after {
+            content: ">";
+            color: #95a0a9;
+            font-size: 13px;
+        }
+
+        @media (max-width: 1050px) {
+            .resumen {
+                grid-template-columns: repeat(3, minmax(150px, 1fr));
+            }
+
+            .modulos {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+        }
+
+        @media (max-width: 760px) {
+            :root {
+                --alto-cabecera: 75px;
+            }
+
+            body.con-panel .contenedor,
+            body.con-panel.panel-expandido .contenedor {
+                width: calc(100% - var(--panel-cerrado));
+                margin-left: var(--panel-cerrado);
+            }
+
+            body.panel-abierto {
+                overflow: hidden;
+            }
+
+            .panel-superposicion {
+                display: block;
+            }
+
+            .panel-lateral,
+            .panel-lateral.abierto {
+                width: min(340px, 92vw);
+                transform: translateX(
+                    calc(-100% + var(--panel-cerrado))
+                );
+            }
+
+            .panel-lateral.abierto {
+                transform: translateX(0);
+            }
+
+            .panel-lateral:not(.abierto)::before {
+                position: absolute;
+                top: 0;
+                right: 0;
+                display: flex;
+                width: var(--panel-cerrado);
+            }
+
+            .barra-superior {
+                align-items: center;
+                flex-direction: row;
+                padding: 16px 20px;
+            }
+
+            body.con-panel .barra-superior {
+                padding-left: calc(var(--panel-cerrado) + 12px);
+            }
+
+            .usuario-superior {
+                width: auto;
+            }
+
+            .datos-usuario {
+                display: none;
+            }
+
+            .cerrar-sesion {
+                width: 38px;
+                padding: 0;
+                overflow: hidden;
+                color: transparent;
+            }
+
+            .cerrar-sesion::before {
+                content: "Salir";
+                color: white;
+                font-size: 11px;
+            }
+
+            .contenedor {
+                padding: 20px 16px 36px;
+            }
+
+            .encabezado-pagina,
+            .cabecera-seccion,
+            .caja-estado {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .acciones-seccion,
+            .acciones-caja {
+                width: 100%;
+            }
+
+            .acciones-seccion .boton,
+            .acciones-caja .boton,
+            .acciones-caja form,
+            .acciones-caja form button {
+                flex: 1 1 auto;
+            }
+
+            .formulario-caja-rapido,
+            .campo-caja-rapido {
+                width: 100%;
+            }
+
+            .caja-principal {
+                min-width: 0;
+                width: 100%;
+            }
+
+            .acciones-caja {
+                align-items: stretch;
+                flex-direction: column;
+                margin-left: 0;
+            }
+
+            .acciones-caja .formulario-caja-rapido {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .resumen {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .fila-stock {
+                grid-template-columns: minmax(0, 1fr) 72px 72px;
+            }
+        }
+
+        @media (max-width: 470px) {
+            .encabezado-pagina h2 {
+                font-size: 23px;
+            }
+
+            .resumen,
+            .modulos {
+                grid-template-columns: 1fr;
+            }
+
+            .fila-stock {
+                grid-template-columns: minmax(0, 1fr) 64px 64px;
+                gap: 9px;
+                padding: 10px 13px;
+            }
+
+            .boton {
+                width: 100%;
+            }
+
+            .caja-principal {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body th:classappend="${esAdministrador
+    ? ' con-panel'
+    : ''}">
+
+<header class="barra-superior">
+    <div class="marca">
+        <div class="marca-sello"
+             aria-hidden="true">LF</div>
+
+        <div class="marca-texto">
+            <h1>La Ferretería</h1>
+            <p>Panel de trabajo</p>
+        </div>
+    </div>
+
+    <div class="usuario-superior">
+        <div class="datos-usuario">
+            <strong th:text="${nombreUsuarioActual}">usuario</strong>
+            <span th:text="${rolUsuarioActual}">Rol</span>
+        </div>
+
+        <form class="cerrar-sesion-form"
+              th:action="@{/logout}"
+              method="post">
+            <button type="submit"
+                    class="cerrar-sesion">
+                Cerrar sesión
+            </button>
+        </form>
+    </div>
+</header>
+
+<main class="contenedor">
+    <div class="encabezado-pagina">
+        <div>
+            <h2 th:text="${esAdministrador
+                ? 'Panel de administración'
+                : 'Panel de ventas'}">
+                Panel de administración
+            </h2>
+            <p>Resumen de la actividad de hoy</p>
+        </div>
+    </div>
+
+    <div th:if="${mensaje}"
+         class="mensaje"
+         th:text="${mensaje}">
+    </div>
+
+    <div th:if="${error}"
+         class="error"
+         th:text="${error}">
+    </div>
+
+    <section th:if="${esAdministrador}"
+             class="control-caja">
+        <div th:if="${cajaAbiertaGlobal == null}"
+             class="caja-estado caja-cerrada-inicio">
+            <div class="caja-principal">
+                <h3>Caja cerrada</h3>
+                <p class="caja-dato">No se pueden registrar cobros.</p>
+            </div>
+
+            <form class="formulario-caja-rapido"
+                  th:action="@{/caja/abrir/inicio}"
+                  method="post">
+                <div class="campo-caja-rapido">
+                    <label for="montoInicialInicio">Efectivo inicial</label>
+                    <input id="montoInicialInicio"
+                           name="montoInicial"
+                           type="number"
+                           min="0"
+                           step="0.01"
+                           value="0.00"
+                           required>
+                </div>
+
+                <button type="submit"
+                        class="boton boton-principal">
+                    Abrir caja
+                </button>
+            </form>
+        </div>
+
+        <div th:if="${cajaAbiertaGlobal != null}"
+             class="caja-estado caja-abierta-inicio">
+            <div class="caja-principal">
+                <h3>
+                    Caja #<span th:text="${cajaAbiertaGlobal.id}"></span>
+                    abierta
+                </h3>
+
+                <p class="caja-dato">
+                    Apertura
+                    <strong th:text="${#temporals.format(
+                        cajaAbiertaGlobal.fechaApertura,
+                        'dd/MM/yyyy HH:mm'
+                    )}"></strong>
+                </p>
+
+                <p class="caja-dato">
+                    Efectivo esperado
+                    <strong>
+                        $<span th:text="${#numbers.formatDecimal(
+                            cajaAbiertaGlobal.efectivoEsperado == null
+                                ? 0 : cajaAbiertaGlobal.efectivoEsperado,
+                            1,
+                            'POINT',
+                            2,
+                            'COMMA'
+                        )}"></span>
+                    </strong>
+                </p>
+            </div>
+
+            <div class="acciones-caja">
+                <a class="boton boton-secundario"
+                   th:href="@{/caja}">
+                    Ver caja
+                </a>
+
+                <form class="formulario-caja-rapido"
+                      th:action="@{/caja/cerrar/inicio}"
+                      method="post">
+                    <div class="campo-caja-rapido">
+                        <label for="efectivoContadoInicio">
+                            Efectivo contado
+                        </label>
+                        <input id="efectivoContadoInicio"
+                               name="efectivoContado"
+                               type="number"
+                               min="0"
+                               step="0.01"
+                               required>
+                    </div>
+
+                    <button type="submit"
+                            class="boton boton-peligro"
+                            onclick="return confirm('¿Cerrar la caja actual?')">
+                        Cerrar caja
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section class="resumen">
+        <div class="metrica metrica-ventas">
+            <span>Ventas de hoy</span>
+            <strong th:text="${cantidadVentasHoy}">0</strong>
+        </div>
+
+        <div class="metrica metrica-dinero">
+            <span>Total vendido</span>
+            <strong>
+                $<span th:text="${#numbers.formatDecimal(
+                    totalVendidoHoy,
+                    1,
+                    'POINT',
+                    2,
+                    'COMMA'
+                )}">0,00</span>
+            </strong>
+        </div>
+
+        <div th:if="${esAdministrador}"
+             class="metrica metrica-ganancia">
+            <span>Ganancia bruta</span>
+            <strong>
+                $<span th:text="${#numbers.formatDecimal(
+                    gananciaHoy,
+                    1,
+                    'POINT',
+                    2,
+                    'COMMA'
+                )}">0,00</span>
+            </strong>
+        </div>
+
+        <div th:if="${esAdministrador}"
+             class="metrica metrica-compras">
+            <span>Compras pendientes</span>
+            <strong th:text="${cantidadComprasPendientes}">0</strong>
+        </div>
+
+        <div class="metrica metrica-stock">
+            <span>Stock bajo</span>
+            <strong th:text="${cantidadStockBajo}">0</strong>
+        </div>
+    </section>
+
+    <div class="tablero-layout">
+        <div class="contenido-tablero">
+
+    <section class="seccion seccion-ventas">
+        <div class="cabecera-seccion">
+            <div>
+                <span class="etiqueta-seccion">Operación diaria</span>
+                <h2>Ventas</h2>
+            </div>
+
+            <div class="acciones-seccion">
+                <a class="boton boton-principal"
+                   th:href="@{/ventas/nueva}">
+                    + Nueva venta
+                </a>
+
+                <a class="boton boton-secundario"
+                   th:href="@{/ventas}">
+                    Historial de ventas
+                </a>
+            </div>
+        </div>
+
+        <div class="tabla-contenedor">
+            <table>
+                <thead>
+                <tr>
+                    <th>Número</th>
+                    <th>Fecha</th>
+                    <th>Cliente</th>
+                    <th>Pago</th>
+                    <th>Estado</th>
+                    <th>Total</th>
+                    <th th:if="${esAdministrador}">Ganancia</th>
+                    <th></th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="venta : ${ventasRecientes}">
+                    <td th:text="${venta.id}"></td>
+
+                    <td th:text="${#temporals.format(
+                        venta.fecha,
+                        'dd/MM HH:mm'
+                    )}"></td>
+
+                    <td>
+                        <span th:if="${venta.cliente != null}"
+                              th:text="${venta.cliente.nombre}"></span>
+
+                        <span th:if="${venta.cliente == null}"
+                              th:text="${#strings.isEmpty(venta.nombreCliente)
+                                ? 'Consumidor final'
+                                : venta.nombreCliente}"></span>
+                    </td>
+
+                    <td th:text="${#strings.replace(
+                        venta.formaPago.name(),
+                        '_',
+                        ' '
+                    )}"></td>
+
+                    <td>
+                        <span class="estado"
+                              th:classappend="${venta.estado.name() == 'CANCELADA'
+                                ? ' estado-cancelada'
+                                : ''}"
+                              th:text="${venta.estado}">
+                        </span>
+                    </td>
+
+                    <td>
+                        $<span th:text="${#numbers.formatDecimal(
+                            venta.total,
+                            1,
+                            'POINT',
+                            2,
+                            'COMMA'
+                        )}"></span>
+                    </td>
+
+                    <td th:if="${esAdministrador}"
+                        class="ganancia">
+                        $<span th:text="${#numbers.formatDecimal(
+                            venta.gananciaTotal,
+                            1,
+                            'POINT',
+                            2,
+                            'COMMA'
+                        )}"></span>
+                    </td>
+
+                    <td>
+                        <a class="enlace-tabla"
+                           th:href="@{/ventas/detalle/{id}(id=${venta.id})}">
+                            Ver
+                        </a>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(ventasRecientes)}">
+                    <td th:attr="colspan=${esAdministrador ? 8 : 7}"
+                        class="sin-datos">
+                        No hay ventas registradas.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="seccion">
+        <div class="cabecera-seccion">
+            <div>
+                <span class="etiqueta-seccion">Datos principales</span>
+                <h2>Gestión comercial</h2>
+            </div>
+        </div>
+
+        <nav class="modulos"
+             aria-label="Gestión comercial">
+            <a class="modulo"
+               th:href="@{/productos}">
+                <span>Productos</span>
+                <span class="modulo-indicador"
+                      aria-hidden="true">›</span>
+            </a>
+
+            <a class="modulo"
+               th:href="@{/clientes}">
+                <span>Clientes</span>
+                <span class="modulo-indicador"
+                      aria-hidden="true">›</span>
+            </a>
+
+            <a th:if="${esAdministrador}"
+               class="modulo"
+               th:href="@{/categorias}">
+                <span>Categorías</span>
+                <span class="modulo-indicador"
+                      aria-hidden="true">›</span>
+            </a>
+
+            <a th:if="${esAdministrador}"
+               class="modulo"
+               th:href="@{/proveedores}">
+                <span>Proveedores</span>
+                <span class="modulo-indicador"
+                      aria-hidden="true">›</span>
+            </a>
+        </nav>
+    </section>
+
+    <section class="seccion">
+        <div class="panel-stock">
+            <div class="panel-stock-cabecera">
+                <h2>Productos con bajo stock</h2>
+
+                <a th:href="@{/productos/stock-bajo}">
+                    Ver todos
+                </a>
+            </div>
+
+            <div th:each="producto : ${productosStockBajo}"
+                 class="fila-stock">
+                <div class="producto-stock">
+                    <strong th:text="${producto.codigo}"></strong>
+                    <span th:text="${producto.nombre}"></span>
+                </div>
+
+                <div class="dato-stock dato-stock-actual">
+                    <span>Actual</span>
+                    <strong th:text="${producto.stockActual
+                        .stripTrailingZeros()
+                        .toPlainString()}"></strong>
+                </div>
+
+                <div class="dato-stock">
+                    <span>Mínimo</span>
+                    <strong th:text="${producto.stockMinimo
+                        .stripTrailingZeros()
+                        .toPlainString()}"></strong>
+                </div>
+            </div>
+
+            <div th:if="${#lists.isEmpty(productosStockBajo)}"
+                 class="sin-datos">
+                No hay productos con bajo stock.
+            </div>
+        </div>
+    </section>
+
+        </div>
+
+    </div>
+</main>
+
+<div th:if="${esAdministrador}"
+     id="panelSuperposicion"
+     class="panel-superposicion"
+     aria-hidden="true">
+</div>
+
+<aside th:if="${esAdministrador}"
+       id="panelAdministracion"
+       class="panel-lateral"
+       tabindex="0"
+       aria-expanded="false"
+       aria-label="Panel de administración">
+    <div class="panel-lateral-cabecera">
+        <div>
+            <span>La Ferretería</span>
+            <h2>Administración</h2>
+        </div>
+    </div>
+
+    <nav class="navegacion-lateral"
+         aria-label="Administración">
+        <span class="grupo-panel">Gestión</span>
+        <a th:href="@{/productos}">Productos</a>
+        <a th:href="@{/clientes}">Clientes</a>
+        <a th:href="@{/categorias}">Categorías</a>
+        <a th:href="@{/proveedores}">Proveedores</a>
+
+        <span class="grupo-panel">Operación</span>
+        <a th:href="@{/caja}">Caja</a>
+
+        <span class="grupo-panel">Compras y mercadería</span>
+        <a th:href="@{/compras/nueva}">Nueva compra</a>
+        <a th:href="@{/compras}">Historial de compras</a>
+        <a th:href="@{/movimientos-stock}">Movimientos de stock</a>
+        <a th:href="@{/productos/stock-bajo}">Stock bajo</a>
+
+        <span class="grupo-panel">Reportes</span>
+        <a th:href="@{/reportes/ventas}">Reporte de ventas</a>
+        <a th:href="@{/reportes/productos}">Productos más vendidos</a>
+        <a th:href="@{/reportes/caja}">Reporte de caja</a>
+
+        <span class="grupo-panel">Sistema</span>
+        <a th:href="@{/usuarios}">Usuarios</a>
+        <a th:href="@{/copias-seguridad}">Copias de seguridad</a>
+    </nav>
+</aside>
+
+<script th:if="${esAdministrador}">
+    const panelAdministracion = document.getElementById(
+        "panelAdministracion"
+    );
+    const panelSuperposicion = document.getElementById(
+        "panelSuperposicion"
+    );
+    let temporizadorCierrePanel;
+
+    function esVistaMovil() {
+        return window.matchMedia("(max-width: 760px)").matches;
+    }
+
+    function cambiarEstadoPanel(abierto) {
+        const vistaMovil = esVistaMovil();
+
+        panelAdministracion.classList.toggle("abierto", abierto);
+        panelSuperposicion.classList.toggle(
+            "visible",
+            abierto && vistaMovil
+        );
+        document.body.classList.toggle(
+            "panel-abierto",
+            abierto && vistaMovil
+        );
+        document.body.classList.toggle(
+            "panel-expandido",
+            abierto && !vistaMovil
+        );
+        panelAdministracion.setAttribute(
+            "aria-expanded",
+            String(abierto)
+        );
+        panelSuperposicion.setAttribute(
+            "aria-hidden",
+            String(!(abierto && vistaMovil))
+        );
+    }
+
+    panelSuperposicion.addEventListener("click", function () {
+        cambiarEstadoPanel(false);
+    });
+
+    panelAdministracion.addEventListener("pointerenter", function () {
+        if (esVistaMovil()) {
+            return;
+        }
+
+        window.clearTimeout(temporizadorCierrePanel);
+        cambiarEstadoPanel(true);
+    });
+
+    panelAdministracion.addEventListener("pointerleave", function () {
+        if (esVistaMovil()) {
+            return;
+        }
+
+        temporizadorCierrePanel = window.setTimeout(function () {
+            cambiarEstadoPanel(false);
+        }, 180);
+    });
+
+    panelAdministracion.addEventListener("click", function () {
+        if (!panelAdministracion.classList.contains("abierto")) {
+            cambiarEstadoPanel(true);
+        }
+    });
+
+    panelAdministracion.addEventListener("focusin", function () {
+        cambiarEstadoPanel(true);
+    });
+
+    document.addEventListener("keydown", function (evento) {
+        if (evento.key === "Escape"
+                && panelAdministracion.classList.contains("abierto")) {
+            cambiarEstadoPanel(false);
+        }
+    });
+
+    window.addEventListener("resize", function () {
+        cambiarEstadoPanel(false);
+    });
+
+    cambiarEstadoPanel(false);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Registrar pago | La Ferretería</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 40px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .contenedor {
+            max-width: 750px;
+            margin: auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .saldo {
+            margin: 20px 0;
+            padding: 18px;
+            border-radius: 6px;
+            background-color: #f5f5f5;
+        }
+
+        .saldo strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .deuda {
+            color: red;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .favor {
+            color: #1d4ed8;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .al-dia {
+            color: green;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .error {
+            margin: 20px 0;
+            padding: 13px;
+            border-radius: 5px;
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .campo {
+            margin-top: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+            font-size: 15px;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .aclaracion {
+            margin-top: 6px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .boton-saldar {
+            margin-top: 10px;
+            padding: 8px 13px;
+            border: none;
+            border-radius: 5px;
+            background-color: #dbeafe;
+            color: #1e3a8a;
+            cursor: pointer;
+        }
+
+        .acciones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 28px;
+        }
+
+        .boton {
+            display: inline-block;
+            padding: 11px 18px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .guardar {
+            background-color: #166534;
+            color: white;
+        }
+
+        .volver {
+            background-color: #ddd;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 15px;
+            }
+
+            .contenedor {
+                padding: 20px;
+            }
+        }
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <h1>Registrar pago</h1>
+
+    <p>
+        Cliente:
+        <strong th:text="${cliente.nombre}"></strong>
+    </p>
+
+    <div class="saldo">
+
+        <strong>Estado actual de la cuenta</strong>
+
+        <span th:if="${cliente.saldoCuentaCorriente.compareTo(
+                              T(java.math.BigDecimal).ZERO
+                          ) > 0}"
+              class="deuda">
+
+            Debe $
+
+            <span th:text="${cliente.saldoCuentaCorriente
+                    .stripTrailingZeros()
+                    .toPlainString()}">
+            </span>
+
+        </span>
+
+        <span th:if="${cliente.saldoCuentaCorriente.compareTo(
+                              T(java.math.BigDecimal).ZERO
+                          ) == 0}"
+              class="al-dia">
+            Cuenta al día
+        </span>
+
+        <span th:if="${cliente.saldoCuentaCorriente.compareTo(
+                              T(java.math.BigDecimal).ZERO
+                          ) < 0}"
+              class="favor">
+
+            A favor $
+
+            <span th:text="${cliente.saldoCuentaCorriente
+                    .abs()
+                    .stripTrailingZeros()
+                    .toPlainString()}">
+            </span>
+
+        </span>
+
+    </div>
+
+    <div th:if="${error}"
+         class="error"
+         th:text="${error}">
+    </div>
+
+    <form th:action="@{/clientes/{id}/pago(id=${cliente.id})}"
+          th:object="${pago}"
+          method="post">
+
+        <div class="campo">
+
+            <label for="monto">
+                Monto pagado
+            </label>
+
+            <input id="monto"
+                   type="number"
+                   min="0.01"
+                   step="0.01"
+                   th:field="*{monto}"
+                   placeholder="Ejemplo: 25000"
+                   required>
+
+            <button th:if="${cliente.saldoCuentaCorriente.compareTo(
+                                     T(java.math.BigDecimal).ZERO
+                                 ) > 0}"
+                    type="button"
+                    class="boton-saldar"
+                    th:attr="data-saldo=${cliente.saldoCuentaCorriente}"
+                    onclick="saldarDeuda(this)">
+                Cargar deuda completa
+            </button>
+
+            <div class="aclaracion">
+                Puede pagar más de lo que debe. La diferencia quedará
+                como dinero a favor.
+            </div>
+
+        </div>
+
+        <div class="campo">
+
+            <label for="medioPago">
+                Medio de pago
+            </label>
+
+            <select id="medioPago"
+                    th:field="*{medioPago}"
+                    required>
+
+                <option value="">
+                    Seleccione un medio de pago
+                </option>
+
+                <option th:each="medio : ${mediosPago}"
+                        th:value="${medio}"
+                        th:text="${#strings.replace(
+                            medio.name(),
+                            '_',
+                            ' '
+                        )}">
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="campo">
+
+            <label for="observacion">
+                Observación
+            </label>
+
+            <textarea id="observacion"
+                      th:field="*{observacion}"
+                      maxlength="300"
+                      placeholder="Ejemplo: Pago parcial en efectivo">
+            </textarea>
+
+        </div>
+
+        <div class="acciones">
+            <a class="boton volver"
+               th:href="@{/}">
+                Inicio
+            </a>
+
+            <button type="submit"
+                    class="boton guardar"
+                    onclick="return confirm('¿Registrar este pago?')">
+                Registrar pago
+            </button>
+
+            <a class="boton volver"
+               th:href="@{/clientes/detalle/{id}(id=${cliente.id})}">
+                Volver
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+    function saldarDeuda(boton) {
+        const saldo = boton.dataset.saldo;
+
+        document.getElementById("monto").value = saldo;
+    }
+</script>
+
+</body>
+</html>

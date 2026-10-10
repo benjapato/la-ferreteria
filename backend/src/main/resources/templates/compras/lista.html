@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Compras | La Ferretería</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 35px;
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            color: #222;
+        }
+
+        .contenedor {
+            width: 100%;
+            max-width: 1450px;
+            margin: auto;
+            padding: 28px;
+            border-radius: 10px;
+            background-color: white;
+        }
+
+        /* Encabezado */
+
+        .encabezado {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .encabezado h1 {
+            margin: 0;
+        }
+
+        .acciones-encabezado {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+        }
+
+        .boton-nuevo,
+        .boton-inicio {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            padding: 0 17px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .boton-nuevo {
+            background-color: #333;
+            color: white;
+        }
+
+        .boton-nuevo:hover {
+            background-color: #505050;
+        }
+
+        .boton-inicio {
+            background-color: #e5e5e5;
+            color: #333;
+        }
+
+        .boton-inicio:hover {
+            background-color: #d5d5d5;
+        }
+
+        /* Mensajes */
+
+        .mensaje-exito,
+        .mensaje-error {
+            margin-bottom: 15px;
+            padding: 12px 14px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .mensaje-exito {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .mensaje-error {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        /* Barra compacta de filtros */
+
+        .barra-filtros {
+            margin: 18px 0 24px;
+        }
+
+        .filtros-principales {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .filtro-numero {
+            flex: 0 0 135px;
+        }
+
+        .filtro-proveedor {
+            flex: 1 1 auto;
+            max-width: 580px;
+        }
+
+        .entrada-filtro,
+        .seleccion-filtro {
+            width: 100%;
+            height: 40px;
+            margin: 0;
+            padding: 0 11px;
+            border: 1px solid #c9c9c9;
+            border-radius: 6px;
+            background-color: white;
+            color: #222;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        .entrada-filtro:focus,
+        .seleccion-filtro:focus {
+            border-color: #2563eb;
+            outline: 2px solid rgba(37, 99, 235, 0.12);
+        }
+
+        .boton-filtro {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            height: 40px;
+            margin: 0;
+            padding: 0 15px;
+            border: none;
+            border-radius: 6px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            text-decoration: none;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .boton-mas-filtros {
+            border: 1px solid #c9c9c9;
+            background-color: white;
+            color: #444;
+        }
+
+        .boton-mas-filtros:hover,
+        .boton-mas-filtros.activo {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .boton-buscar {
+            background-color: #333;
+            color: white;
+        }
+
+        .boton-buscar:hover {
+            background-color: #505050;
+        }
+
+        .boton-limpiar {
+            background-color: #e7e7e7;
+            color: #333;
+        }
+
+        .boton-limpiar:hover {
+            background-color: #d7d7d7;
+        }
+
+        /* Filtros avanzados */
+
+        .filtros-avanzados {
+            display: none;
+            grid-template-columns:
+                repeat(3, minmax(170px, 230px));
+            gap: 10px;
+            margin-top: 11px;
+            padding: 13px;
+            border: 1px solid #e1e1e1;
+            border-radius: 7px;
+            background-color: #fafafa;
+        }
+
+        .filtros-avanzados.visible {
+            display: grid;
+        }
+
+        .campo-avanzado {
+            min-width: 0;
+        }
+
+        .campo-avanzado label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .error-filtro {
+            margin-top: 11px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            background-color: #f8d7da;
+            color: #842029;
+            font-size: 14px;
+        }
+
+        .resumen-filtro {
+            margin-top: 9px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .resumen-filtro strong {
+            color: #222;
+        }
+
+        /* Tabla */
+
+        .tabla-contenedor {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid #e2e2e2;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            min-width: 950px;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: #333;
+            color: white;
+        }
+
+        th,
+        td {
+            padding: 12px 11px;
+            border-bottom: 1px solid #e4e4e4;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        th {
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background-color: #fafafa;
+        }
+
+        .columna-numero {
+            width: 80px;
+            text-align: center;
+        }
+
+        .columna-fecha {
+            width: 145px;
+            white-space: nowrap;
+        }
+
+        .columna-total {
+            width: 140px;
+            text-align: right;
+            white-space: nowrap;
+            font-weight: bold;
+        }
+
+        .columna-acciones {
+            width: 280px;
+            text-align: center;
+        }
+
+        /* Estados */
+
+        .estado {
+            display: inline-block;
+            min-width: 90px;
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .estado-pendiente {
+            background-color: #fff3cd;
+            color: #664d03;
+        }
+
+        .estado-confirmada {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .estado-cancelada {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        /* Acciones */
+
+        .acciones-compra {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .acciones-compra form {
+            margin: 0;
+        }
+
+        .boton-detalle,
+        .boton-confirmar,
+        .boton-cancelar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 34px;
+            padding: 0 11px;
+            border: none;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            text-decoration: none;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .boton-detalle {
+            background-color: #dbeafe;
+            color: #1e3a8a;
+        }
+
+        .boton-detalle:hover {
+            background-color: #bfdbfe;
+        }
+
+        .boton-confirmar {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .boton-confirmar:hover {
+            background-color: #b9dac9;
+        }
+
+        .boton-cancelar {
+            background-color: #f3c5c5;
+            color: #8b0000;
+        }
+
+        .boton-cancelar:hover {
+            background-color: #e8aaaa;
+        }
+
+        .sin-datos {
+            padding: 35px;
+            color: #666;
+            text-align: center;
+        }
+
+        /* Responsive */
+
+        @media (max-width: 900px) {
+            body {
+                padding: 20px;
+            }
+
+            .contenedor {
+                padding: 22px;
+            }
+
+            .filtros-principales {
+                flex-wrap: wrap;
+            }
+
+            .filtro-numero {
+                flex: 0 0 135px;
+            }
+
+            .filtro-proveedor {
+                flex: 1 1 350px;
+                max-width: none;
+            }
+
+            .filtros-avanzados {
+                grid-template-columns:
+                    repeat(2, minmax(150px, 1fr));
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .contenedor {
+                padding: 17px;
+            }
+
+            .encabezado {
+                align-items: stretch;
+            }
+
+            .encabezado,
+            .acciones-encabezado {
+                width: 100%;
+            }
+
+            .boton-nuevo,
+            .boton-inicio {
+                flex: 1;
+            }
+
+            .filtro-numero,
+            .filtro-proveedor {
+                flex: 1 1 100%;
+                max-width: none;
+            }
+
+            .boton-filtro {
+                flex: 1 1 auto;
+            }
+
+            .filtros-avanzados {
+                grid-template-columns: 1fr;
+            }
+        }
+        .paginacion {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 18px 0;
+        }
+
+        .paginacion button {
+            width: 40px;
+            height: 36px;
+            border: 1px solid #b8b8b8;
+            border-radius: 5px;
+            background-color: white;
+            color: #222;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .paginacion button:hover:not(:disabled) {
+            background-color: #eeeeee;
+        }
+
+        .paginacion button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .paginacion span {
+            min-width: 130px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <!-- Encabezado -->
+
+    <div class="encabezado">
+
+        <h1>Compras</h1>
+
+        <div class="acciones-encabezado">
+
+            <a class="boton-inicio"
+               th:href="@{/}">
+                Inicio
+            </a>
+
+            <a class="boton-nuevo"
+               th:href="@{/compras/nueva}">
+                Nueva compra
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- Mensajes -->
+
+    <div th:if="${mensaje}"
+         class="mensaje-exito"
+         th:text="${mensaje}">
+    </div>
+
+    <div th:if="${exito}"
+         class="mensaje-exito"
+         th:text="${exito}">
+    </div>
+
+    <div th:if="${error}"
+         class="mensaje-error"
+         th:text="${error}">
+    </div>
+
+    <!-- Filtros -->
+
+    <form class="barra-filtros"
+          th:action="@{/compras/buscar}"
+          method="get">
+
+        <div class="filtros-principales">
+
+            <!-- Número de compra -->
+
+            <div class="filtro-numero">
+
+                <input type="number"
+                       class="entrada-filtro"
+                       name="numero"
+                       min="1"
+                       th:value="${numeroFiltro}"
+                       placeholder="Compra N.º"
+                       aria-label="Número de compra">
+
+            </div>
+
+            <!-- Proveedor -->
+
+            <div class="filtro-proveedor">
+
+                <input type="text"
+                       class="entrada-filtro"
+                       name="proveedor"
+                       th:value="${proveedorFiltro}"
+                       placeholder="Buscar proveedor"
+                       autocomplete="off"
+                       aria-label="Proveedor">
+
+            </div>
+
+            <!-- Más filtros -->
+
+            <button id="botonMasFiltros"
+                    type="button"
+                    class="boton-filtro boton-mas-filtros"
+                    onclick="alternarFiltrosAvanzados()">
+                Más filtros
+            </button>
+
+            <!-- Buscar -->
+
+            <button type="submit"
+                    class="boton-filtro boton-buscar">
+                Buscar
+            </button>
+
+            <!-- Limpiar -->
+
+            <a class="boton-filtro boton-limpiar"
+               th:href="@{/compras}">
+                Limpiar
+            </a>
+
+        </div>
+
+        <!-- Filtros avanzados -->
+
+        <div id="filtrosAvanzados"
+             class="filtros-avanzados"
+             th:classappend="${fechaDesdeFiltro != null
+                or fechaHastaFiltro != null
+                or (estadoFiltro != null and !estadoFiltro.isBlank())
+                ? ' visible'
+                : ''}">
+
+            <!-- Fecha desde -->
+
+            <div class="campo-avanzado">
+
+                <label for="fechaDesdeFiltro">
+                    Fecha desde
+                </label>
+
+                <input id="fechaDesdeFiltro"
+                       type="date"
+                       class="entrada-filtro"
+                       name="fechaDesde"
+                       th:value="${fechaDesdeFiltro}">
+
+            </div>
+
+            <!-- Fecha hasta -->
+
+            <div class="campo-avanzado">
+
+                <label for="fechaHastaFiltro">
+                    Fecha hasta
+                </label>
+
+                <input id="fechaHastaFiltro"
+                       type="date"
+                       class="entrada-filtro"
+                       name="fechaHasta"
+                       th:value="${fechaHastaFiltro}">
+
+            </div>
+
+            <!-- Estado -->
+
+            <div class="campo-avanzado">
+
+                <label for="estadoFiltro">
+                    Estado
+                </label>
+
+                <select id="estadoFiltro"
+                        class="seleccion-filtro"
+                        name="estado">
+
+                    <option value="">
+                        Todos los estados
+                    </option>
+
+                    <option value="PENDIENTE"
+                            th:selected="${estadoFiltro == 'PENDIENTE'}">
+                        Pendiente
+                    </option>
+
+                    <option value="CONFIRMADA"
+                            th:selected="${estadoFiltro == 'CONFIRMADA'}">
+                        Confirmada
+                    </option>
+
+                    <option value="CANCELADA"
+                            th:selected="${estadoFiltro == 'CANCELADA'}">
+                        Cancelada
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+        <!-- Error de filtro -->
+
+        <div th:if="${errorFiltro}"
+             class="error-filtro"
+             th:text="${errorFiltro}">
+        </div>
+
+        <!-- Cantidad de resultados -->
+
+        <div th:if="${cantidadResultados != null}"
+             class="resumen-filtro">
+
+            Resultados encontrados:
+
+            <strong th:text="${cantidadResultados}">
+                0
+            </strong>
+
+        </div>
+
+    </form>
+
+    <!-- Tabla -->
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+
+            <tr>
+                <th class="columna-numero">
+                    N.º
+                </th>
+
+                <th class="columna-fecha">
+                    Fecha
+                </th>
+
+                <th>
+                    Proveedor
+                </th>
+
+                <th>
+                    Registrada por
+                </th>
+
+                <th>
+                    Estado
+                </th>
+
+                <th class="columna-total">
+                    Total
+                </th>
+
+                <th class="columna-acciones">
+                    Acciones
+                </th>
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            <!-- Sin compras -->
+
+            <tr th:if="${#lists.isEmpty(compras)}">
+
+                <td colspan="7"
+                    class="sin-datos">
+
+                    <span th:if="${cantidadResultados == null}">
+                        Todavía no hay compras registradas.
+                    </span>
+
+                    <span th:if="${cantidadResultados != null}">
+                        No se encontraron compras con los filtros seleccionados.
+                    </span>
+
+                </td>
+
+            </tr>
+
+            <!-- Compras -->
+
+            <tr th:each="compra : ${compras}">
+
+                <!-- Número -->
+
+                <td class="columna-numero"
+                    th:text="${compra.id}">
+                    1
+                </td>
+
+                <!-- Fecha -->
+
+                <td class="columna-fecha"
+                    th:text="${#temporals.format(
+                        compra.fecha,
+                        'dd/MM/yyyy'
+                    )}">
+                    28/07/2026
+                </td>
+
+                <!-- Proveedor -->
+
+                <td th:text="${compra.proveedor != null
+                        ? compra.proveedor.nombre
+                        : 'Sin proveedor'}">
+                    Proveedor
+                </td>
+
+                <!-- Usuario -->
+
+                <td th:text="${compra.usuario == null
+                        ? 'Sin registrar'
+                        : compra.usuario.nombreCompleto}">
+                </td>
+
+                <!-- Estado -->
+
+                <td>
+
+                    <span class="estado"
+                          th:classappend="${' estado-'
+                            + #strings.toLowerCase(
+                                compra.estado.name()
+                            )}"
+                          th:text="${#strings.capitalize(
+                            #strings.toLowerCase(
+                                compra.estado.name()
+                            )
+                          )}">
+                        Pendiente
+                    </span>
+
+                </td>
+
+                <!-- Total -->
+
+                <td class="columna-total"
+                    th:text="${'$ '
+                        + #numbers.formatDecimal(
+                            compra.total,
+                            1,
+                            'POINT',
+                            2,
+                            'COMMA'
+                        )}">
+                    $ 0,00
+                </td>
+
+                <!-- Acciones -->
+
+                <td class="columna-acciones">
+
+                    <div class="acciones-compra">
+
+                        <!-- Detalle -->
+
+                        <a class="boton-detalle"
+                           th:href="@{/compras/{id}(
+                                id=${compra.id}
+                           )}">
+                            Ver
+                        </a>
+
+                        <!-- Confirmar -->
+
+                        <form th:if="${compra.estado.name()
+                                == 'PENDIENTE'}"
+                              th:action="@{/compras/{id}/confirmar(
+                                    id=${compra.id}
+                              )}"
+                              method="post"
+                              onsubmit="return confirmarCompra()">
+
+                            <button type="submit"
+                                    class="boton-confirmar">
+                                Confirmar
+                            </button>
+
+                        </form>
+
+                        <!-- Cancelar -->
+
+                        <form th:if="${compra.estado.name()
+                                != 'CANCELADA'}"
+                              th:action="@{/compras/{id}/cancelar(
+                                    id=${compra.id}
+                              )}"
+                              method="post"
+                              onsubmit="return cancelarCompra()">
+
+                            <button type="submit"
+                                    class="boton-cancelar">
+                                Cancelar
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <nav th:if="${pagina != null and pagina.totalPages > 1}"
+         class="paginacion"
+         aria-label="Paginacion">
+        <button type="button"
+                title="Pagina anterior"
+                aria-label="Pagina anterior"
+                th:disabled="${!pagina.hasPrevious()}"
+                th:attr="data-pagina=${pagina.number - 1}"
+                onclick="cambiarPagina(this.dataset.pagina)">
+            &larr;
+        </button>
+
+        <span th:text="|Pagina ${pagina.number + 1} de ${pagina.totalPages}|">
+        </span>
+
+        <button type="button"
+                title="Pagina siguiente"
+                aria-label="Pagina siguiente"
+                th:disabled="${!pagina.hasNext()}"
+                th:attr="data-pagina=${pagina.number + 1}"
+                onclick="cambiarPagina(this.dataset.pagina)">
+            &rarr;
+        </button>
+    </nav>
+
+</div>
+
+<script>
+    function cambiarPagina(numeroPagina) {
+        const url = new URL(window.location.href);
+        url.searchParams.set("pagina", numeroPagina);
+        window.location.assign(url.toString());
+    }
+
+
+    function alternarFiltrosAvanzados() {
+
+        const filtros =
+            document.getElementById(
+                "filtrosAvanzados"
+            );
+
+        const boton =
+            document.getElementById(
+                "botonMasFiltros"
+            );
+
+        filtros.classList.toggle(
+            "visible"
+        );
+
+        const estaVisible =
+            filtros.classList.contains(
+                "visible"
+            );
+
+        boton.classList.toggle(
+            "activo",
+            estaVisible
+        );
+
+        boton.textContent =
+            estaVisible
+                ? "Ocultar filtros"
+                : "Más filtros";
+    }
+
+    function confirmarCompra() {
+
+        return confirm(
+            "¿Confirmar esta compra y aumentar el stock de los productos?"
+        );
+    }
+
+    function cancelarCompra() {
+
+        return confirm(
+            "¿Cancelar esta compra?"
+        );
+    }
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            const filtros =
+                document.getElementById(
+                    "filtrosAvanzados"
+                );
+
+            const boton =
+                document.getElementById(
+                    "botonMasFiltros"
+                );
+
+            if (
+                filtros.classList.contains(
+                    "visible"
+                )
+            ) {
+
+                boton.classList.add(
+                    "activo"
+                );
+
+                boton.textContent =
+                    "Ocultar filtros";
+            }
+        }
+    );
+</script>
+
+</body>
+</html>

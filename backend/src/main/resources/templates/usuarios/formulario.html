@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title th:text="${edicion
+        ? 'Editar usuario | La Ferretería'
+        : 'Nuevo usuario | La Ferretería'}">
+    </title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 35px;
+            background-color: #f4f4f4;
+            color: #222;
+            font-family: Arial, sans-serif;
+        }
+
+        .contenedor {
+            width: 100%;
+            max-width: 760px;
+            margin: auto;
+            padding: 28px;
+            border-radius: 10px;
+            background-color: white;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        .subtitulo {
+            margin: 8px 0 0;
+            color: #666;
+        }
+
+        .error-general {
+            margin-top: 18px;
+            padding: 12px 14px;
+            border-radius: 6px;
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 17px;
+            margin-top: 22px;
+        }
+
+        .campo-completo {
+            grid-column: 1 / -1;
+        }
+
+        .campo label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        .campo input,
+        .campo select {
+            width: 100%;
+            height: 42px;
+            padding: 0 11px;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .campo input:focus,
+        .campo select:focus {
+            border-color: #2563eb;
+            outline: 2px solid rgba(37, 99, 235, 0.13);
+        }
+
+        .error-campo {
+            display: block;
+            margin-top: 5px;
+            color: #b91c1c;
+            font-size: 13px;
+        }
+
+        .ayuda {
+            display: block;
+            margin-top: 6px;
+            color: #666;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .opcion-activo {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            min-height: 42px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            background-color: #f5f5f5;
+        }
+
+        .opcion-activo input {
+            width: 18px;
+            height: 18px;
+        }
+
+        .acciones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+            margin-top: 24px;
+        }
+
+        .boton {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 41px;
+            padding: 0 17px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .guardar {
+            background-color: #333;
+            color: white;
+        }
+
+        .volver {
+            background-color: #e5e5e5;
+            color: #333;
+        }
+
+        @media (max-width: 650px) {
+            body {
+                padding: 12px;
+            }
+
+            .contenedor {
+                padding: 18px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .campo-completo {
+                grid-column: auto;
+            }
+
+            .acciones,
+            .acciones .boton {
+                width: 100%;
+            }
+        }
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <h1 th:text="${edicion
+        ? 'Editar usuario'
+        : 'Nuevo usuario'}">
+    </h1>
+
+    <p class="subtitulo">
+        El administrador puede crear vendedores y otros administradores.
+    </p>
+
+    <div th:if="${error}"
+         class="error-general"
+         th:text="${error}">
+    </div>
+
+    <form th:action="@{/usuarios/guardar}"
+          th:object="${usuarioFormulario}"
+          method="post">
+
+        <input type="hidden"
+               th:field="*{id}">
+
+        <div class="grid">
+
+            <div class="campo campo-completo">
+                <label for="nombreCompleto">
+                    Nombre completo
+                </label>
+
+                <input id="nombreCompleto"
+                       type="text"
+                       th:field="*{nombreCompleto}"
+                       maxlength="120"
+                       required>
+
+                <span class="error-campo"
+                      th:if="${#fields.hasErrors('nombreCompleto')}"
+                      th:errors="*{nombreCompleto}">
+                </span>
+            </div>
+
+            <div class="campo">
+                <label for="nombreUsuario">
+                    Nombre de usuario
+                </label>
+
+                <input id="nombreUsuario"
+                       type="text"
+                       th:field="*{nombreUsuario}"
+                       minlength="3"
+                       maxlength="60"
+                       autocomplete="off"
+                       required>
+
+                <span class="ayuda">
+                    Solo letras, números, punto, guion y guion bajo.
+                </span>
+
+                <span class="error-campo"
+                      th:if="${#fields.hasErrors('nombreUsuario')}"
+                      th:errors="*{nombreUsuario}">
+                </span>
+            </div>
+
+            <div class="campo">
+                <label for="rol">
+                    Rol
+                </label>
+
+                <select id="rol"
+                        th:field="*{rol}"
+                        required>
+
+                    <option value="">
+                        Seleccione un rol
+                    </option>
+
+                    <option th:each="rolItem : ${roles}"
+                            th:value="${rolItem}"
+                            th:text="${rolItem.name() == 'ADMINISTRADOR'
+                                ? 'Administrador'
+                                : 'Vendedor'}">
+                    </option>
+                </select>
+
+                <span class="error-campo"
+                      th:if="${#fields.hasErrors('rol')}"
+                      th:errors="*{rol}">
+                </span>
+            </div>
+
+            <div class="campo campo-completo">
+                <label for="contrasena"
+                       th:text="${edicion
+                           ? 'Nueva contraseña'
+                           : 'Contraseña'}">
+                </label>
+
+                <input id="contrasena"
+                       type="password"
+                       th:field="*{contrasena}"
+                       minlength="8"
+                       maxlength="100"
+                       autocomplete="new-password"
+                       th:required="${!edicion}">
+
+                <span class="ayuda"
+                      th:if="${edicion}">
+                    Dejala vacía para conservar la contraseña actual.
+                </span>
+
+                <span class="ayuda"
+                      th:unless="${edicion}">
+                    Debe tener como mínimo 8 caracteres.
+                </span>
+
+                <span class="error-campo"
+                      th:if="${#fields.hasErrors('contrasena')}"
+                      th:errors="*{contrasena}">
+                </span>
+            </div>
+
+            <div class="campo campo-completo">
+                <label class="opcion-activo"
+                       for="activo">
+
+                    <input id="activo"
+                           type="checkbox"
+                           th:field="*{activo}">
+
+                    <span>
+                        Usuario activo. Puede iniciar sesión en el sistema.
+                    </span>
+                </label>
+            </div>
+
+        </div>
+
+        <div class="acciones">
+            <a class="boton volver"
+               th:href="@{/}">
+                Inicio
+            </a>
+
+            <button type="submit"
+                    class="boton guardar">
+                Guardar usuario
+            </button>
+
+            <a class="boton volver"
+               th:href="@{/usuarios}">
+                Volver
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>

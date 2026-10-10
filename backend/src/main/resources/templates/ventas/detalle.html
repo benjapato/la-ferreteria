@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Detalle de venta | La Ferretería</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .contenedor {
+            max-width: 1200px;
+            margin: auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .informacion {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .dato {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .dato strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .pago-linea {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 5px;
+        }
+
+        .confirmada {
+            color: green;
+            font-weight: bold;
+        }
+
+        .cancelada {
+            color: red;
+            font-weight: bold;
+        }
+
+        .aviso-cancelada {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 5px;
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .tabla-contenedor {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+        }
+
+        tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .ganancia {
+            color: green;
+            font-weight: bold;
+        }
+
+        .resumen {
+            max-width: 450px;
+            margin-left: auto;
+            margin-top: 25px;
+            border-top: 2px solid #333;
+        }
+
+        .linea-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 5px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .total-principal {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .ganancia-total {
+            color: green;
+            font-weight: bold;
+        }
+
+        .observaciones {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 6px;
+        }
+
+        .acciones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .volver {
+            display: inline-block;
+            padding: 10px 17px;
+            border-radius: 5px;
+            background-color: #ddd;
+            color: #333;
+            text-decoration: none;
+        }
+
+        @media (max-width: 800px) {
+            body {
+                padding: 15px;
+            }
+
+            .informacion {
+                grid-template-columns: 1fr;
+            }
+        }
+        .comprobante {
+            display: inline-block;
+            padding: 10px 17px;
+            border-radius: 5px;
+            background-color: #166534;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <h1>
+        Venta #<span th:text="${venta.id}"></span>
+    </h1>
+
+    <div th:if="${venta.estado.name() == 'CANCELADA'}"
+         class="aviso-cancelada">
+        Esta venta fue cancelada y los productos fueron devueltos al stock.
+    </div>
+
+    <div class="informacion">
+
+        <div class="dato">
+            <strong>Fecha</strong>
+
+            <span th:text="${#temporals.format(
+                    venta.fecha,
+                    'dd/MM/yyyy HH:mm'
+                )}">
+            </span>
+        </div>
+
+        <div class="dato">
+            <strong>Cliente</strong>
+
+            <span th:text="${venta.nombreCliente}">
+            </span>
+        </div>
+
+        <div class="dato">
+            <strong>Forma de pago</strong>
+
+            <span th:text="${#strings.replace(
+                    venta.formaPago.name(),
+                    '_',
+                    ' '
+                )}">
+            </span>
+        </div>
+
+        <div class="dato"
+             th:if="${venta.formaPago.name() == 'COMBINADO'}">
+            <strong>Detalle del pago</strong>
+
+            <div class="pago-linea"
+                 th:each="pago : ${venta.pagos}">
+                <span th:text="${#strings.replace(
+                    pago.formaPago.name(), '_', ' '
+                )}">
+                </span>
+                <span th:text="${'$ ' + #numbers.formatDecimal(
+                    pago.monto, 1, 'POINT', 2, 'COMMA'
+                )}">
+                </span>
+            </div>
+        </div>
+
+        <div class="dato">
+            <strong>Estado</strong>
+
+            <span th:if="${venta.estado.name() == 'CONFIRMADA'}"
+                  class="confirmada">
+                Confirmada
+            </span>
+
+            <span th:if="${venta.estado.name() == 'CANCELADA'}"
+                  class="cancelada">
+                Cancelada
+            </span>
+        </div>
+
+        <div class="dato">
+            <strong>Vendedor responsable</strong>
+
+            <span th:text="${venta.usuario == null
+                    ? 'Sin registrar'
+                    : venta.usuario.nombreCompleto}">
+            </span>
+        </div>
+
+    </div>
+
+    <h2>Productos vendidos</h2>
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+            <tr>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio unitario</th>
+                <th>Subtotal</th>
+                <th>Costo unitario</th>
+                <th>Costo total</th>
+                <th>Ganancia</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="detalle : ${venta.detalles}">
+
+                <td th:text="${detalle.producto.codigo}">
+                </td>
+
+                <td th:text="${detalle.producto.nombre}">
+                </td>
+
+                <td th:text="${detalle.cantidad
+                        .stripTrailingZeros()
+                        .toPlainString()}">
+                </td>
+
+                <td>
+                    <span>$ </span>
+                    <span th:text="${detalle.precioUnitario}">
+                    </span>
+                </td>
+
+                <td>
+                    <span>$ </span>
+                    <span th:text="${detalle.subtotal}">
+                    </span>
+                </td>
+
+                <td>
+                    <span>$ </span>
+                    <span th:text="${detalle.costoUnitario}">
+                    </span>
+                </td>
+
+                <td>
+                    <span>$ </span>
+                    <span th:text="${detalle.costoSubtotal}">
+                    </span>
+                </td>
+
+                <td class="ganancia">
+                    <span>$ </span>
+                    <span th:text="${detalle.ganancia}">
+                    </span>
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="resumen">
+
+        <div class="linea-total">
+            <span>Total vendido</span>
+
+            <span>
+                $ <span th:text="${venta.total}"></span>
+            </span>
+        </div>
+
+        <div class="linea-total">
+            <span>Costo total</span>
+
+            <span>
+                $ <span th:text="${venta.costoTotal}"></span>
+            </span>
+        </div>
+
+        <div class="linea-total total-principal ganancia-total">
+            <span>Ganancia bruta</span>
+
+            <span>
+                $ <span th:text="${venta.gananciaTotal}"></span>
+            </span>
+        </div>
+
+    </div>
+
+    <div class="observaciones">
+
+        <strong>Observaciones:</strong>
+
+        <span th:text="${#strings.isEmpty(venta.observaciones)
+                        ? 'Sin observaciones'
+                        : venta.observaciones}">
+        </span>
+
+    </div>
+
+    <div class="acciones">
+        <a class="volver"
+           th:href="@{/}">
+            Inicio
+        </a>
+
+        <a class="boton comprobante"
+           th:href="@{/ventas/comprobante/{id}
+            (id=${venta.id})}">
+
+            Ver comprobante
+
+        </a>
+
+        <a class="volver"
+           th:href="@{/ventas}">
+            Volver a ventas
+        </a>
+
+        <a class="volver"
+           th:href="@{/movimientos-stock}">
+            Ver movimientos de stock
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

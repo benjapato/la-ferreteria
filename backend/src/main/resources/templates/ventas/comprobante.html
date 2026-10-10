@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Comprobante de venta
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 35px;
+            font-family: Arial, sans-serif;
+            background-color: #eeeeee;
+            color: #222222;
+        }
+
+        .comprobante {
+            max-width: 900px;
+            margin: auto;
+            padding: 35px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px
+            rgba(0, 0, 0, 0.12);
+        }
+
+        .encabezado {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 30px;
+            padding-bottom: 25px;
+            border-bottom: 2px solid #222222;
+        }
+
+        .empresa h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .empresa p {
+            margin: 8px 0 0;
+            color: #555555;
+        }
+
+        .numero {
+            text-align: right;
+        }
+
+        .numero span {
+            display: block;
+            color: #555555;
+            font-size: 14px;
+        }
+
+        .numero strong {
+            display: block;
+            margin-top: 5px;
+            font-size: 25px;
+        }
+
+        .cancelada {
+            margin-top: 20px;
+            padding: 14px;
+            border: 2px solid #b91c1c;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            color: #b91c1c;
+            background-color: #fee2e2;
+        }
+
+        .datos {
+            display: grid;
+            grid-template-columns:
+                repeat(2, minmax(220px, 1fr));
+            gap: 18px;
+            margin-top: 25px;
+        }
+
+        .dato {
+            padding: 15px;
+            border-radius: 6px;
+            background-color: #f5f5f5;
+        }
+
+        .dato strong {
+            display: block;
+            margin-bottom: 7px;
+            color: #555555;
+            font-size: 14px;
+        }
+
+        .pago-linea {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 5px;
+        }
+
+        .tabla-contenedor {
+            margin-top: 30px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 13px 10px;
+            border-bottom: 1px solid #dddddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #333333;
+            color: white;
+        }
+
+        .numero-tabla {
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .total-contenedor {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        .total {
+            min-width: 320px;
+            padding: 20px;
+            border-radius: 7px;
+            background-color: #d1e7dd;
+            color: #0f5132;
+            text-align: right;
+        }
+
+        .total span {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 15px;
+        }
+
+        .total strong {
+            font-size: 30px;
+        }
+
+        .observaciones {
+            margin-top: 30px;
+            padding: 18px;
+            border-radius: 6px;
+            background-color: #f5f5f5;
+        }
+
+        .observaciones strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .pie {
+            margin-top: 35px;
+            padding-top: 20px;
+            border-top: 1px solid #cccccc;
+            text-align: center;
+            color: #666666;
+        }
+
+        .acciones {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .boton {
+            display: inline-block;
+            padding: 11px 18px;
+            border: none;
+            border-radius: 5px;
+            font-size: 15px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .imprimir {
+            background-color: #166534;
+            color: white;
+        }
+
+        .detalle {
+            background-color: #dbeafe;
+            color: #1e3a8a;
+        }
+
+        .volver {
+            background-color: #dddddd;
+            color: #333333;
+        }
+
+        @media print {
+
+            body {
+                padding: 0;
+                background-color: white;
+            }
+
+            .comprobante {
+                max-width: none;
+                margin: 0;
+                padding: 15px;
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            .acciones {
+                display: none;
+            }
+
+            .dato,
+            .observaciones,
+            .total {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+
+            th {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+        }
+
+        @media (max-width: 700px) {
+
+            body {
+                padding: 15px;
+            }
+
+            .comprobante {
+                padding: 20px;
+            }
+
+            .encabezado {
+                flex-direction: column;
+            }
+
+            .numero {
+                text-align: left;
+            }
+
+            .datos {
+                grid-template-columns: 1fr;
+            }
+
+            .total-contenedor {
+                justify-content: stretch;
+            }
+
+            .total {
+                width: 100%;
+                min-width: 0;
+            }
+        }
+
+    </style>
+
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="comprobante">
+
+    <header class="encabezado">
+
+        <div class="empresa">
+
+            <h1>La Ferretería</h1>
+
+            <p>
+                Comprobante interno de venta
+            </p>
+
+        </div>
+
+        <div class="numero">
+
+            <span>
+                Comprobante de venta
+            </span>
+
+            <strong>
+                N.º
+                <span th:text="${venta.id}">
+                    1
+                </span>
+            </strong>
+
+        </div>
+
+    </header>
+
+    <!-- Aviso para una venta cancelada -->
+
+    <div th:if="${venta.estado.name() == 'CANCELADA'}"
+         class="cancelada">
+
+        VENTA CANCELADA
+
+    </div>
+
+    <section class="datos">
+
+        <div class="dato">
+
+            <strong>Fecha y hora</strong>
+
+            <span th:text="${#temporals.format(
+                    venta.fecha,
+                    'dd/MM/yyyy HH:mm'
+                )}">
+            </span>
+
+        </div>
+
+        <div class="dato"
+             th:if="${venta.formaPago.name() == 'COMBINADO'}">
+
+            <strong>Detalle del pago</strong>
+
+            <div class="pago-linea"
+                 th:each="pago : ${venta.pagos}">
+                <span th:text="${#strings.replace(
+                    pago.formaPago.name(), '_', ' '
+                )}">
+                </span>
+                <span th:text="${'$ ' + #numbers.formatDecimal(
+                    pago.monto, 1, 'POINT', 2, 'COMMA'
+                )}">
+                </span>
+            </div>
+
+        </div>
+
+        <div class="dato">
+
+            <strong>Cliente</strong>
+
+            <span th:if="${venta.cliente != null}"
+                  th:text="${venta.cliente.nombre}">
+            </span>
+
+            <span th:if="${venta.cliente == null
+                          and !#strings.isEmpty(venta.nombreCliente)}"
+                  th:text="${venta.nombreCliente}">
+            </span>
+
+            <span th:if="${venta.cliente == null
+                          and #strings.isEmpty(venta.nombreCliente)}">
+
+                Consumidor final
+
+            </span>
+
+        </div>
+
+        <div class="dato">
+
+            <strong>Forma de pago</strong>
+
+            <span th:text="${#strings.replace(
+                    venta.formaPago.name(),
+                    '_',
+                    ' '
+                )}">
+            </span>
+
+        </div>
+
+        <div class="dato">
+
+            <strong>Estado</strong>
+
+            <span th:text="${venta.estado}">
+            </span>
+
+        </div>
+
+        <div class="dato">
+
+            <strong>Vendedor</strong>
+
+            <span th:text="${venta.usuario == null
+                    ? 'Sin registrar'
+                    : venta.usuario.nombreCompleto}">
+            </span>
+
+        </div>
+
+    </section>
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+
+            <tr>
+                <th>Código</th>
+                <th>Producto</th>
+                <th class="numero-tabla">
+                    Cantidad
+                </th>
+                <th class="numero-tabla">
+                    Precio
+                </th>
+                <th class="numero-tabla">
+                    Subtotal
+                </th>
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            <tr th:each="detalle : ${venta.detalles}">
+
+                <td th:text="${detalle.producto.codigo}">
+                </td>
+
+                <td th:text="${detalle.producto.nombre}">
+                </td>
+
+                <td class="numero-tabla"
+                    th:text="${detalle.cantidad
+                            .stripTrailingZeros()
+                            .toPlainString()}">
+                </td>
+
+                <td class="numero-tabla">
+
+                    $
+
+                    <span th:text="${#numbers.formatDecimal(
+                            detalle.precioUnitario,
+                            1,
+                            'POINT',
+                            2,
+                            'COMMA'
+                        )}">
+                    </span>
+
+                </td>
+
+                <td class="numero-tabla">
+
+                    $
+
+                    <span th:text="${#numbers.formatDecimal(
+                            detalle.subtotal,
+                            1,
+                            'POINT',
+                            2,
+                            'COMMA'
+                        )}">
+                    </span>
+
+                </td>
+
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(venta.detalles)}">
+
+                <td colspan="5"
+                    style="text-align: center;
+                           padding: 25px;
+                           color: #666666;">
+
+                    La venta no tiene productos registrados.
+
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="total-contenedor">
+
+        <div class="total">
+
+            <span>
+                Total de la venta
+            </span>
+
+            <strong>
+
+                $
+
+                <span th:text="${#numbers.formatDecimal(
+                        venta.total,
+                        1,
+                        'POINT',
+                        2,
+                        'COMMA'
+                    )}">
+                </span>
+
+            </strong>
+
+        </div>
+
+    </div>
+
+    <div th:if="${!#strings.isEmpty(
+                        venta.observaciones
+                    )}"
+         class="observaciones">
+
+        <strong>Observaciones</strong>
+
+        <span th:text="${venta.observaciones}">
+        </span>
+
+    </div>
+
+    <footer class="pie">
+
+        Gracias por su compra.
+
+        <br>
+
+        Este comprobante no reemplaza
+        una factura fiscal.
+
+    </footer>
+
+    <div class="acciones">
+        <a class="boton volver"
+           th:href="@{/}">
+
+            Inicio
+
+        </a>
+
+        <button type="button"
+                class="boton imprimir"
+                onclick="window.print()">
+
+            Imprimir comprobante
+
+        </button>
+
+        <a class="boton detalle"
+           th:href="@{/ventas/detalle/{id}
+                    (id=${venta.id})}">
+
+            Ver detalle de venta
+
+        </a>
+
+        <a class="boton volver"
+           th:href="@{/ventas}">
+
+            Volver a ventas
+
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

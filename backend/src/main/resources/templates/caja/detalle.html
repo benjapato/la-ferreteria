@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Detalle de caja | La Ferretería</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 40px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .contenedor {
+            max-width: 1100px;
+            margin: auto;
+            padding: 30px;
+            border-radius: 10px;
+            background-color: white;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .informacion {
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f5f5f5;
+        }
+
+        .columnas {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .seccion {
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .fila {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .fila:last-child {
+            border-bottom: none;
+        }
+
+        .subtotal {
+            margin-top: 15px;
+            font-size: 19px;
+            font-weight: bold;
+        }
+
+        .total {
+            margin-top: 25px;
+            padding: 22px;
+            border-radius: 8px;
+            text-align: center;
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .total strong {
+            display: block;
+            margin-top: 8px;
+            font-size: 30px;
+        }
+
+        .arqueo {
+            margin-top: 25px;
+        }
+
+        .arqueo-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0 28px;
+        }
+
+        .diferencia-negativa {
+            color: #b91c1c;
+        }
+
+        .diferencia-positiva {
+            color: #166534;
+        }
+
+        .tabla-contenedor {
+            margin-top: 25px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 11px 12px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #f3f4f6;
+            color: #4b5563;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .sin-datos {
+            padding: 22px;
+            color: #6b7280;
+            text-align: center;
+        }
+
+        .boton {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 10px 17px;
+            border-radius: 5px;
+            background-color: #ddd;
+            color: #333;
+            text-decoration: none;
+        }
+
+        @media (max-width: 750px) {
+            body {
+                padding: 15px;
+            }
+
+            .contenedor {
+                padding: 20px;
+            }
+
+            .columnas {
+                grid-template-columns: 1fr;
+            }
+
+            .arqueo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <th:block th:replace="~{fragments/navegacion :: estilos}"></th:block>
+</head>
+
+<body class="app-con-navegacion">
+<div th:replace="~{fragments/navegacion :: estructura}"></div>
+
+<div class="contenedor">
+
+    <h1>
+        Caja #
+        <span th:text="${caja.id}">
+        </span>
+    </h1>
+
+    <div class="informacion">
+
+        <p>
+            <strong>Estado:</strong>
+            <span th:text="${caja.estado}">
+            </span>
+        </p>
+
+        <p>
+            <strong>Apertura:</strong>
+
+            <span th:text="${#temporals.format(
+                    caja.fechaApertura,
+                    'dd/MM/yyyy HH:mm'
+                )}">
+            </span>
+        </p>
+
+        <p>
+            <strong>Cierre:</strong>
+
+            <span th:text="${caja.fechaCierre == null
+                    ? '-'
+                    : #temporals.format(
+                        caja.fechaCierre,
+                        'dd/MM/yyyy HH:mm'
+                    )}">
+            </span>
+        </p>
+
+        <p>
+            <strong>Abierta por:</strong>
+
+            <span th:text="${caja.usuarioApertura == null
+                    ? 'Sin registrar'
+                    : caja.usuarioApertura.nombreCompleto}">
+            </span>
+        </p>
+
+        <p>
+            <strong>Cerrada por:</strong>
+
+            <span th:text="${caja.usuarioCierre == null
+                    ? '-'
+                    : caja.usuarioCierre.nombreCompleto}">
+            </span>
+        </p>
+
+    </div>
+
+    <section class="seccion arqueo">
+        <h2>Arqueo de efectivo</h2>
+
+        <div class="arqueo-grid">
+            <div class="fila">
+                <span>Efectivo inicial</span>
+                <strong th:text="${'$ ' + #numbers.formatDecimal(
+                    caja.montoInicial == null ? 0 : caja.montoInicial,
+                    1, 'POINT', 2, 'COMMA'
+                )}"></strong>
+            </div>
+
+            <div class="fila">
+                <span>Ventas en efectivo</span>
+                <strong th:text="${'$ ' + #numbers.formatDecimal(
+                    caja.ventasEfectivo,
+                    1, 'POINT', 2, 'COMMA'
+                )}"></strong>
+            </div>
+
+            <div class="fila">
+                <span>Pagos de clientes en efectivo</span>
+                <strong th:text="${'$ ' + #numbers.formatDecimal(
+                    caja.pagosClientesEfectivo,
+                    1, 'POINT', 2, 'COMMA'
+                )}"></strong>
+            </div>
+
+            <div class="fila">
+                <span>Ingresos manuales</span>
+                <strong th:text="${'$ ' + #numbers.formatDecimal(
+                    caja.ingresosEfectivo == null
+                        ? 0 : caja.ingresosEfectivo,
+                    1, 'POINT', 2, 'COMMA'
+                )}"></strong>
+            </div>
+
+            <div class="fila">
+                <span>Retiros</span>
+                <strong th:text="${'$ ' + #numbers.formatDecimal(
+                    caja.retirosEfectivo == null
+                        ? 0 : caja.retirosEfectivo,
+                    1, 'POINT', 2, 'COMMA'
+                )}"></strong>
+            </div>
+
+            <div class="fila">
+                <span>Efectivo esperado</span>
+                <strong th:text="${'$ ' + #numbers.formatDecimal(
+                    caja.efectivoEsperado == null
+                        ? 0 : caja.efectivoEsperado,
+                    1, 'POINT', 2, 'COMMA'
+                )}"></strong>
+            </div>
+
+            <div class="fila">
+                <span>Efectivo contado</span>
+                <strong th:text="${caja.efectivoContado == null
+                    ? '-'
+                    : '$ ' + #numbers.formatDecimal(
+                        caja.efectivoContado,
+                        1, 'POINT', 2, 'COMMA'
+                    )}"></strong>
+            </div>
+
+            <div class="fila">
+                <span>Diferencia</span>
+                <strong th:text="${caja.diferenciaEfectivo == null
+                    ? '-'
+                    : '$ ' + #numbers.formatDecimal(
+                        caja.diferenciaEfectivo,
+                        1, 'POINT', 2, 'COMMA'
+                    )}"
+                    th:classappend="${caja.diferenciaEfectivo == null
+                        ? ''
+                        : caja.diferenciaEfectivo.signum() < 0
+                            ? ' diferencia-negativa'
+                            : caja.diferenciaEfectivo.signum() > 0
+                                ? ' diferencia-positiva' : ''}"></strong>
+            </div>
+        </div>
+    </section>
+
+    <div class="columnas">
+
+        <section class="seccion">
+
+            <h2>Ventas</h2>
+
+            <div class="fila">
+                <span>Efectivo</span>
+
+                <strong>
+                    $
+                    <span th:text="${caja.ventasEfectivo}">
+                    </span>
+                </strong>
+            </div>
+
+            <div class="fila">
+                <span>Transferencia</span>
+
+                <strong>
+                    $
+                    <span th:text="${caja.ventasTransferencia}">
+                    </span>
+                </strong>
+            </div>
+
+            <div class="fila">
+                <span>Tarjeta de débito</span>
+
+                <strong>
+                    $
+                    <span th:text="${caja.ventasTarjetaDebito}">
+                    </span>
+                </strong>
+            </div>
+
+            <div class="fila">
+                <span>Tarjeta de crédito</span>
+
+                <strong>
+                    $
+                    <span th:text="${caja.ventasTarjetaCredito}">
+                    </span>
+                </strong>
+            </div>
+
+            <div class="subtotal">
+                Total de ventas:
+                $
+                <span th:text="${caja.totalVentas}">
+                </span>
+            </div>
+
+        </section>
+
+        <section class="seccion">
+
+            <h2>Pagos de clientes</h2>
+
+            <div class="fila">
+                <span>Efectivo</span>
+
+                <strong>
+                    $
+                    <span th:text="${caja.pagosClientesEfectivo}">
+                    </span>
+                </strong>
+            </div>
+
+            <div class="fila">
+                <span>Transferencia</span>
+
+                <strong>
+                    $
+                    <span th:text="${caja.pagosClientesTransferencia}">
+                    </span>
+                </strong>
+            </div>
+
+            <div class="fila">
+                <span>Tarjeta de débito</span>
+
+                <strong>
+                    $
+                    <span th:text="${caja.pagosClientesTarjetaDebito}">
+                    </span>
+                </strong>
+            </div>
+
+            <div class="fila">
+                <span>Tarjeta de crédito</span>
+
+                <strong>
+                    $
+                    <span th:text="${caja.pagosClientesTarjetaCredito}">
+                    </span>
+                </strong>
+            </div>
+
+            <div class="fila">
+                <span>Otro</span>
+
+                <strong>
+                    $
+                    <span th:text="${caja.pagosClientesOtro}">
+                    </span>
+                </strong>
+            </div>
+
+            <div class="subtotal">
+                Total de pagos:
+                $
+                <span th:text="${caja.totalPagosClientes}">
+                </span>
+            </div>
+
+        </section>
+
+    </div>
+
+    <div class="total">
+        Total general registrado
+
+        <strong>
+            $
+            <span th:text="${caja.totalGeneral}">
+            </span>
+        </strong>
+    </div>
+
+    <section class="seccion arqueo">
+        <h2>Ingresos y retiros manuales</h2>
+
+        <div class="tabla-contenedor">
+            <table>
+                <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Monto</th>
+                    <th>Motivo</th>
+                    <th>Usuario</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="movimiento : ${movimientosCaja}">
+                    <td th:text="${#temporals.format(
+                        movimiento.fecha, 'dd/MM/yyyy HH:mm'
+                    )}"></td>
+                    <td th:text="${movimiento.tipo}"></td>
+                    <td th:text="${'$ ' + #numbers.formatDecimal(
+                        movimiento.monto, 1, 'POINT', 2, 'COMMA'
+                    )}"></td>
+                    <td th:text="${movimiento.motivo}"></td>
+                    <td th:text="${movimiento.usuario == null
+                        ? 'Sin registrar'
+                        : movimiento.usuario.nombreCompleto}"></td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(movimientosCaja)}">
+                    <td colspan="5" class="sin-datos">
+                        Esta caja no tiene movimientos manuales.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <a class="boton"
+       th:href="@{/}">
+        Inicio
+    </a>
+
+    <a class="boton"
+       th:href="@{/caja}">
+        Volver a caja
+    </a>
+
+</div>
+
+</body>
+</html>
