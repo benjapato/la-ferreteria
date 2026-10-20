@@ -74,8 +74,8 @@ export default function PrinterSettingsModal({ onClose }) {
           <div><dt>Papel</dt><dd>Rollo de 58 mm</dd></div>
           <div><dt>Documento</dt><dd>Nota de pedido</dd></div>
           <div><dt>Comercio</dt><dd>LaFerreteria</dd></div>
-          <div><dt>Domicilio</dt><dd>Direccion de demostracion</dd></div>
-          <div><dt>Contacto</dt><dd>Contacto de demostracion</dd></div>
+          <div><dt>Domicilio</dt><dd>Domicilio del comercio, Localidad</dd></div>
+          <div><dt>Contacto</dt><dd>Configurar</dd></div>
         </dl>
         {settings && !settings.impresoras.length && <div className="ticket-notice" role="status">No hay impresoras de tickets disponibles. Conecte la NexusPOS por USB e instale su controlador en Windows.</div>}
         {error && <div className="sale-error" role="alert">{error}</div>}
@@ -83,7 +83,7 @@ export default function PrinterSettingsModal({ onClose }) {
       </section>
       <section className="printer-settings__preview" aria-label="Vista previa de la nota de pedido">
         <header><h3>Nota de pedido</h3><span>58 mm</span></header>
-        <div className="ticket-preview">{previewError ? <p role="alert">No se pudo cargar la vista previa.</p> : <img src="/api/printing/sample" alt="Nota de pedido LaFerreteria de 58 mm, Direccion de demostracion, telefono Contacto de demostracion" onError={() => setPreviewError(true)} />}</div>
+        <div className="ticket-preview">{previewError ? <p role="alert">No se pudo cargar la vista previa.</p> : <img src="/api/printing/sample" alt="Nota de pedido LaFerreteria de 58 mm con datos de ejemplo del comercio" onError={() => setPreviewError(true)} />}</div>
       </section>
     </div>
   </Modal>

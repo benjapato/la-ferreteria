@@ -50,7 +50,7 @@ public class CopiaSeguridadService {
             @Value("${spring.datasource.password}")
             String datasourceContrasena,
 
-            @Value("${app.copias-seguridad.pg-dump:pg_dump}")
+            @Value("${app.copias-seguridad.pg-dump:C:/Program Files/PostgreSQL/18/bin/pg_dump.exe}")
             String rutaPgDump,
 
             @Value("${app.copias-seguridad.directorio:backups}")

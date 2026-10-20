@@ -1,140 +1,95 @@
-# Configuración de la demo
+# Configuracion de una instalacion propia
 
-Esta copia usa una base nueva llamada `laferreteria_demo`. No incluye registros del negocio, copias de seguridad ni contraseñas de la instalación original. El esquema se crea al iniciar; el único dato inicial automático es la cuenta administradora que configures.
+## 1. Crear una base separada
 
-## Requisitos
+En PostgreSQL, crear un usuario con permiso de inicio de sesion, sin privilegios
+de superusuario, y asignarle una contrasena propia. Por ejemplo, llamar al
+usuario `laferreteria_app`.
 
-- JDK 21, con `JAVA_HOME` y `java` disponibles.
-- Node.js 24 y npm disponibles. Vite admite Node 20.19 o Node 22.12 en adelante; Node 24 es una opción compatible para esta copia.
-- PostgreSQL instalado y en ejecución. Se recomienda usar PostgreSQL 18, que es la versión contemplada por la instalación original.
-- Acceso a internet en la primera compilación para descargar Gradle y dependencias. El proyecto incluye Gradle Wrapper 9.5.1 y fija pnpm 11.9.0; no hace falta instalar Gradle o pnpm globalmente.
+Crear una base vacia, por ejemplo `laferreteria_demo`, con ese usuario como
+propietario. El usuario necesita permisos para crear y actualizar las tablas de
+esa base. No apuntar esta copia a la base de la ferreteria en funcionamiento.
 
-Los comandos siguientes son para PowerShell en Windows. En macOS o Linux, exportá las mismas variables y usá `bash ./gradlew` en lugar de `.\gradlew.bat`.
+## 2. Configurar el backend
 
-## 1. Crear una base aislada
+La aplicacion exige estas variables de entorno, sin valores predeterminados:
 
-Abrí `psql` con una cuenta administradora de tu instalación PostgreSQL:
+| Variable | Contenido |
+| --- | --- |
+| `SPRING_DATASOURCE_URL` | URL de la base propia, por ejemplo `jdbc:postgresql://localhost:5432/laferreteria_demo` |
+| `SPRING_DATASOURCE_USERNAME` | Usuario de PostgreSQL de esa base |
+| `SPRING_DATASOURCE_PASSWORD` | Contrasena privada de ese usuario |
 
-```powershell
-psql -U postgres
-```
+Para una base nueva, configurar tambien:
 
-En la consola de PostgreSQL, ejecutá:
+| Variable | Contenido |
+| --- | --- |
+| `APP_USUARIO_INICIAL_USUARIO` | Nombre de usuario del administrador inicial |
+| `APP_USUARIO_INICIAL_CONTRASENA` | Contrasena privada de entre 8 y 100 caracteres; preferir una larga y unica |
+| `APP_USUARIO_INICIAL_NOMBRE` | Nombre visible del administrador; opcional |
 
-```sql
-CREATE ROLE laferreteria_demo LOGIN;
-\password laferreteria_demo
-CREATE DATABASE laferreteria_demo OWNER laferreteria_demo;
-\q
-```
+No hay una contrasena universal de acceso. Sin una contrasena inicial valida,
+una base sin administrador no puede completar el inicio. Cuando ya existe un
+administrador activo, esta configuracion no cambia su contrasena.
 
-El comando `\password` solicita una contraseña sin incluirla en el archivo ni en el historial de SQL. Usá esa contraseña al configurar `SPRING_DATASOURCE_PASSWORD`. Si `psql` no se encuentra, agregá el directorio `bin` de PostgreSQL a `PATH` o ejecutá su ruta completa.
-
-## 2. Configurar la sesión de PowerShell
-
-Desde la carpeta del repositorio, definí las variables de esta sesión:
+En PowerShell, se pueden definir variables solo para la terminal actual. Este
+ejemplo pide las contrasenas sin escribirlas en el comando ni mostrarlas:
 
 ```powershell
 $env:SPRING_DATASOURCE_URL = 'jdbc:postgresql://localhost:5432/laferreteria_demo'
-$env:SPRING_DATASOURCE_USERNAME = 'laferreteria_demo'
-$databasePassword = Read-Host 'Contraseña del usuario PostgreSQL de demo' -AsSecureString
-$env:SPRING_DATASOURCE_PASSWORD = [Net.NetworkCredential]::new('', $databasePassword).Password
-Remove-Variable databasePassword
-
-$env:APP_USUARIO_INICIAL_NOMBRE = 'Administrador de demo'
-$env:APP_USUARIO_INICIAL_USUARIO = 'demo_admin'
-$adminPassword = Read-Host 'Elegí una contraseña de 8 a 100 caracteres para la cuenta de demo' -AsSecureString
-$env:APP_USUARIO_INICIAL_CONTRASENA = [Net.NetworkCredential]::new('', $adminPassword).Password
-Remove-Variable adminPassword
+$env:SPRING_DATASOURCE_USERNAME = 'laferreteria_app'
+$claveBase = Read-Host 'Contrasena de PostgreSQL' -AsSecureString
+$env:SPRING_DATASOURCE_PASSWORD = [System.Net.NetworkCredential]::new('', $claveBase).Password
+$env:APP_USUARIO_INICIAL_USUARIO = 'administrador'
+$claveAdmin = Read-Host 'Contrasena del administrador inicial' -AsSecureString
+$env:APP_USUARIO_INICIAL_CONTRASENA = [System.Net.NetworkCredential]::new('', $claveAdmin).Password
 ```
 
-Elegí contraseñas propias. Los nombres del ejemplo identifican únicamente la nueva demo. Las contraseñas quedan en el entorno de esta sesión y de los procesos que inicies desde ella; no se escriben al repositorio. Cerrá la terminal al terminar.
+Despues ejecutar la compilacion y el inicio desde esa misma terminal, como
+indica el README. Las variables son locales a ese proceso y sus hijos; no
+configuran los accesos directos del escritorio. Cerrar la terminal al terminar.
 
-Las cinco variables obligatorias son:
+Para utilizar los accesos directos, configurar las variables en
+"Variables de entorno de la cuenta" en Windows antes de abrir la aplicacion.
+No guardarlas en archivos que se suban a GitHub. Una variable de entorno no es
+un almacen cifrado: proteger tambien la cuenta y el equipo.
 
-| Variable | Uso |
-| --- | --- |
-| `SPRING_DATASOURCE_USERNAME` | Usuario de la nueva base PostgreSQL. |
-| `SPRING_DATASOURCE_PASSWORD` | Contraseña de ese usuario. |
-| `APP_USUARIO_INICIAL_NOMBRE` | Nombre visible del administrador inicial. |
-| `APP_USUARIO_INICIAL_USUARIO` | Nombre de acceso del administrador inicial. |
-| `APP_USUARIO_INICIAL_CONTRASENA` | Contraseña inicial, de 8 a 100 caracteres. |
+Un archivo `.env` no se carga automaticamente en este proyecto. No poner
+contrasenas en variables `VITE_*`: forman parte del frontend que ve el navegador.
 
-Definilas antes de cada ejecución del backend. La aplicación crea el administrador únicamente cuando no hay uno activo; cambiar estas variables no cambia la contraseña de una cuenta existente. Los archivos `.env` están excluidos de Git, pero Spring Boot no los carga automáticamente: para el backend usá variables del entorno o tu mecanismo local de configuración.
+## 3. Compilar y abrir en Windows
 
-## 3. Ejecutar la aplicación completa
+Desde `backend`, ejecutar `.\gradlew.bat bootJar`. Desde la carpeta principal,
+`Crear accesos directos.bat` genera los accesos para abrir y cerrar.
 
-En la misma terminal que tiene las variables configuradas:
+Los accesos utilizan Java y buscan el JAR compilado en `backend/build/libs`.
+Los puertos habituales son 9092 para la aplicacion y 5173 para desarrollo React.
+No ejecutar estos iniciadores mientras otra instalacion este usando el 9092:
+podrian abrir la instalacion que ya esta en marcha.
 
-```powershell
-Set-Location backend
-.\gradlew.bat bootRun
-```
+## 4. Respaldos e impresora
 
-Gradle instala el frontend con el archivo de dependencias fijadas, lo compila y lo sirve dentro del backend. Abrí [http://localhost:9092/app/](http://localhost:9092/app/) e ingresá con la cuenta que elegiste. Detené la aplicación con `Ctrl+C`.
+Configurar `APP_COPIAS_SEGURIDAD_PG_DUMP` con la ruta local de `pg_dump.exe` si
+PostgreSQL no esta en la ubicacion predeterminada. Los respaldos se generan en
+`backend/backups-react` al iniciar desde `backend` y estan excluidos de Git.
+Eso no los copia a otro disco: conservar respaldos externos por separado.
 
-Para construir un archivo ejecutable:
+La impresora se elige dentro de la aplicacion, una vez instalado su controlador
+en Windows. No se distribuye la configuracion de la impresora de otro equipo.
 
-```powershell
-.\gradlew.bat bootJar
-java -jar build\libs\LaFerreteriaReactBackend-0.0.1-SNAPSHOT.jar
-```
+El ticket de esta copia muestra domicilio y telefono de ejemplo. Para una
+instalacion personalizada, revisar `TicketLayout.java` en el paquete `printing`
+y `frontend/src/components/PrinterSettingsModal.jsx`; mantener coherente la
+prueba de encabezado en `TicketPrintingTests.java`. No publicar datos privados
+del cliente al personalizarlos.
 
-El archivo también necesita las variables de entorno y PostgreSQL disponibles al ejecutarse.
+## 5. Pruebas sin datos reales
 
-## Desarrollo con recarga automática
+Las pruebas normales utilizan H2 en memoria. Ejecutarlas sin variables
+`SPRING_DATASOURCE_*` del negocio, para evitar que el entorno sobrescriba su
+configuracion. Tampoco configurar `TEST_POSTGRES_*` para la ejecucion normal.
 
-Dejá el backend funcionando y abrí otra terminal en la carpeta del repositorio:
-
-```powershell
-Set-Location frontend
-npx --yes pnpm@11.9.0 install --frozen-lockfile
-npx --yes pnpm@11.9.0 run dev
-```
-
-Abrí [http://localhost:5173](http://localhost:5173). Vite reenvía `/api` al backend. La terminal del frontend no necesita las contraseñas de PostgreSQL ni del administrador.
-
-## Puertos y copias de seguridad
-
-| Variable opcional | Valor predeterminado | Efecto |
-| --- | --- | --- |
-| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://localhost:5432/laferreteria_demo` | Conexión a la base de demo. |
-| `SERVER_PORT` | `9092` | Puerto del backend. |
-| `APP_FRONTEND_URL` | `http://localhost:5173` | Origen permitido del frontend durante desarrollo. |
-| `FRONTEND_PORT` | `5173` | Puerto de Vite. Si está ocupado, Vite informa el error. |
-| `BACKEND_URL` | `http://localhost:9092` | Destino del proxy de Vite durante desarrollo. |
-| `APP_COPIAS_SEGURIDAD_DIRECTORIO` | `backups-demo` | Carpeta local de backups, relativa al directorio de ejecución del backend. |
-| `APP_COPIAS_SEGURIDAD_PG_DUMP` | `pg_dump` | Ejecutable de PostgreSQL buscado en `PATH`, o su ruta absoluta. |
-| `APP_COPIAS_SEGURIDAD_AUTOMATICAS` | `false` | Permite habilitar las copias programadas de la demo. |
-
-Si cambiás el backend a otro puerto, actualizá `SERVER_PORT` en su terminal y `BACKEND_URL` en la del frontend. Si cambiás el puerto del frontend, actualizá `FRONTEND_PORT` y `APP_FRONTEND_URL` en sus terminales correspondientes. Reiniciá los procesos después de cambiar las variables. También podés definir `FRONTEND_PORT` y `BACKEND_URL` en un `.env.local` dentro de `frontend`; sus valores se leen solo en la configuración del servidor de Vite.
-
-Para usar backups, instalá una versión de `pg_dump` compatible con tu servidor PostgreSQL. Si no está en `PATH`, por ejemplo:
-
-```powershell
-$env:APP_COPIAS_SEGURIDAD_PG_DUMP = 'C:/Program Files/PostgreSQL/18/bin/pg_dump.exe'
-```
-
-## Verificaciones
-
-Desde `backend`:
-
-```powershell
-.\gradlew.bat test
-```
-
-Las pruebas normales usan una base H2 en memoria y credenciales ficticias definidas solo para pruebas. La prueba opcional `UnidadMedidaPostgresTests` solo se activa cuando existe `TEST_POSTGRES_URL`; requiere también `TEST_POSTGRES_USER` y `TEST_POSTGRES_PASSWORD`. Usá una base de pruebas aislada: el test crea y elimina su propio esquema. La construcción del frontend forma parte del procesamiento de recursos de Gradle.
-
-Desde `frontend`:
-
-```powershell
-npx --yes pnpm@11.9.0 run lint
-npx --yes pnpm@11.9.0 run build
-node --test src/utils/quantities.test.js
-```
-
-## Archivos locales excluidos
-
-El `.gitignore` omite credenciales locales, dependencias, compilados, logs, bases de datos y backups. Esta copia tampoco distribuye los scripts de carga de datos de la instalación, el manual interno ni los accesos directos locales. Para mostrar pantallas con información, cargá únicamente datos ficticios en `laferreteria_demo`.
-
-Los encabezados de los comprobantes de esta copia usan textos de demostración en lugar de la dirección y el contacto de la instalación original.
+La prueba opcional `UnidadMedidaPostgresTests` solo se activa con
+`TEST_POSTGRES_URL`; tambien requiere `TEST_POSTGRES_USER` y
+`TEST_POSTGRES_PASSWORD`. Crea y elimina un esquema temporal. Usar exclusivamente
+una base de pruebas dedicada y un usuario con permiso de crear esquemas.

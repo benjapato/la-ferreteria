@@ -1,54 +1,59 @@
-# Dependencias y compilados
-**/node_modules/
-**/dist/
-**/dist-ssr/
-**/.gradle/
-**/build/
-**/bin/
-*.class
-*.jar
-!backend/gradle/wrapper/gradle-wrapper.jar
-
-# Configuracion y credenciales locales
+# Secretos y configuracion privada
 .env
 .env.*
 !.env.example
-*.local
 application-local.properties
 application-local.yml
 application-local.yaml
-*.pem
+application-private.*
 *.key
+*.pem
 *.p12
 *.pfx
 *.jks
 
-# Datos, exportaciones y copias de seguridad
-backups*/
-**/backups*/
+# Datos de trabajo, respaldos y documentos del cliente
+.runtime/
+backups/
+backups-*/
+datos-privados/
+importaciones/
 *.backup
 *.dump
-*.sql
-*.db
-*.sqlite
-*.sqlite3
-exports/
-uploads/
+*.bak
+*.csv
+*.tsv
+*.xls
+*.xlsx
+*.doc
+*.docx
+*.pdf
+*.zip
+*.7z
 
-# Registros y estado de ejecucion
+# Dependencias, compilaciones y cache
+node_modules/
+.gradle/
+build/
+bin/
+dist/
+out/
+coverage/
+test-results/
+playwright-report/
+*.class
+*.jar
+!backend/gradle/wrapper/gradle-wrapper.jar
+
+# Registros, accesos y estado local
 logs/
-**/logs/
 *.log
-.runtime/
 *.pid
-
-# Editores y sistema operativo
+*.lnk
 .idea/
-**/.idea/
 .vscode/
 *.iml
 *.iws
 *.ipr
 .DS_Store
 Thumbs.db
-*.lnk

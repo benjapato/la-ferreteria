@@ -28,9 +28,9 @@ public final class TicketLayout implements Printable {
         var g = image.createGraphics();
         try {
             text(result, g, width, "LaFerreteria", 16, true, true, false);
-            text(result, g, width, "Comercio de demostracion", 9, false, true, false);
-            text(result, g, width, "Direccion de demostracion", 9, false, true, false);
-            text(result, g, width, "Contacto de demostracion", 9, false, true, false);
+            text(result, g, width, "Domicilio del comercio", 9, false, true, false);
+            text(result, g, width, "Localidad", 9, false, true, false);
+            text(result, g, width, "Tel.: configurar", 9, false, true, false);
             rule(result);
             text(result, g, width, "NOTA DE PEDIDO", 11, true, true, false);
             if (data.id() == 0) text(result, g, width, "PRUEBA", 8, false, true, false);

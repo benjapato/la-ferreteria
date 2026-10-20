@@ -1,128 +1,87 @@
-<div align="center">
+# LaFerreteria
 
-# La Ferretería
+Aplicacion de gestion para una ferreteria: productos y stock, ventas, clientes,
+cuentas corrientes, compras a proveedores, caja, reportes y copias de seguridad.
+Incluye una interfaz React, un backend Spring Boot y un iniciador para Windows.
 
-### Gestión comercial en una sola aplicación
+## Acerca de esta copia
 
-**React · Java 21 · Spring Boot · PostgreSQL**
+Esta es una copia del codigo preparada para compartir. No incluye la base de
+datos del negocio, respaldos, archivos Excel, manuales con capturas, registros de
+uso ni contrasenas de la instalacion original. Los datos de domicilio y telefono
+del ticket son ejemplos. La instalacion original no se modifica.
 
-Ventas · Inventario · Clientes · Compras · Caja · Reportes
-
-![Tablero principal de La Ferretería](docs/images/dashboard.png)
-
-<sub>Interfaz del proyecto con datos ficticios de demostración.</sub>
-
-</div>
-
-## El proyecto
-
-La Ferretería es un sistema de gestión comercial que conecta las tareas diarias de un negocio: vender productos, consultar existencias, registrar compras, administrar clientes y controlar los movimientos de caja.
-
-La interfaz está desarrollada en React y se comunica con una API en Spring Boot. La información se almacena en PostgreSQL, con autenticación y permisos para administradores y vendedores.
-
-## Funcionalidades
-
-| Módulo | Qué permite hacer |
-| :--- | :--- |
-| **Ventas** | Registrar ventas, consultar el historial, revisar detalles y emitir comprobantes |
-| **Inventario** | Administrar productos y categorías, ajustar existencias y consultar movimientos de stock |
-| **Clientes** | Gestionar clientes, cuentas corrientes y pagos |
-| **Compras** | Administrar proveedores, cargar compras y consultar su estado |
-| **Caja** | Apertura, movimientos, cierre y arqueo; configuración de cierre automático |
-| **Reportes** | Consultar información de ventas, productos y caja |
-| **Administración** | Gestionar usuarios, roles y copias de seguridad |
-
-## Una mirada al catálogo
-
-![Catálogo con productos ficticios de demostración](docs/images/catalogo.png)
-
-El catálogo reúne filtros, existencias, precios y márgenes para consultar la información del producto desde una misma pantalla.
-
-## Arquitectura
-
-```mermaid
-flowchart LR
-    UI[React + Vite] -->|API HTTP y sesión| API[Spring Boot + Spring Security]
-    API --> S[Servicios de negocio]
-    S --> JPA[Spring Data JPA]
-    JPA --> DB[(PostgreSQL)]
-```
-
-El backend organiza controladores, servicios, repositorios y entidades. El frontend separa páginas, componentes, autenticación y acceso a la API. El proyecto también conserva plantillas Thymeleaf en el backend.
-
-## Tecnologías
-
-| Área | Implementación |
-| :--- | :--- |
-| Frontend | React 19, React Router 7, Vite 8 y Lucide React |
-| Backend | Java 21, Spring Boot 4.1, Spring Security y Spring Data JPA |
-| Persistencia | PostgreSQL; H2 para las pruebas que lo configuran |
-| Construcción | Gradle Wrapper y pnpm 11.9 |
-| Pruebas incluidas | JUnit/Spring Boot para backend y Node.js Test Runner para cantidades del frontend |
-
-## Ejecutar localmente
-
-Necesitás **Java 21**, **Node.js 24** y una instancia local de **PostgreSQL**. Gradle usa **pnpm 11.9** mediante npm; no hace falta instalarlo globalmente.
-
-1. Creá una base vacía para demostración.
-2. Configurá la conexión y el administrador inicial según [la guía de configuración](docs/CONFIGURACION.md).
-3. Desde `backend`, ejecutá:
-
-```powershell
-.\gradlew.bat bootRun
-```
-
-En Linux o macOS podés usar `bash ./gradlew bootRun`.
-
-Gradle instala y compila el frontend y lo incorpora al backend. Con el puerto predeterminado de esta copia, abrí **http://localhost:9092/app/**.
-
-### Desarrollo del frontend
-
-Con el backend en ejecución, desde `frontend`:
-
-```powershell
-npx --yes pnpm@11.9.0 install --frozen-lockfile
-npx --yes pnpm@11.9.0 dev
-```
-
-Vite utiliza el puerto `5173` y redirige las llamadas `/api` al backend en `9092`.
-
-## Comprobaciones disponibles
-
-```powershell
-# Desde frontend
-npx --yes pnpm@11.9.0 lint
-node --test src/utils/quantities.test.js
-
-# Desde backend
-.\gradlew.bat test
-```
-
-En la revisión de esta copia pasaron **10 pruebas del frontend y 113 del backend**, además del lint y la compilación. Se utilizó H2 en memoria y se excluyó una prueba que requiere PostgreSQL real. El [informe de verificación](docs/VERIFICACION.md) detalla el entorno y los límites de esa revisión.
+No es un instalador listo para abrir: primero hay que configurar una base propia
+y compilar. Publicar el codigo en GitHub no publica la aplicacion en Internet.
 
 ## Estructura
 
-```text
-frontend/
-├── src/pages/             # Pantallas del sistema
-├── src/components/        # Componentes y formularios
-├── src/auth/              # Sesión y autenticación
-└── src/api/               # Comunicación con el backend
-backend/
-├── src/main/java/         # Controladores, servicios, entidades y repositorios
-├── src/main/resources/    # Configuración y plantillas
-└── src/test/              # Pruebas del backend
-docs/
-├── CONFIGURACION.md       # Preparación del entorno local
-└── images/                # Capturas con datos de demostración
+- `backend/src/main/java`: controladores, servicios, entidades y repositorios.
+- `backend/src/main/resources`: configuracion, plantillas y recursos.
+- `backend/src/test`: pruebas automaticas y datos ficticios.
+- `frontend/src`: pantallas y componentes React.
+- `frontend/public`: iconos y recursos publicos.
+- `.aplicacion`: iniciador, cierre y compilacion para Windows.
+- `docs`: configuracion y recomendaciones para publicar.
+
+## Requisitos
+
+- JDK 21.
+- PostgreSQL y una base dedicada. pgAdmin es opcional para administrarla.
+- Node.js 22.12 o posterior compatible con Vite 8 y npm.
+- Conexion a Internet para descargar dependencias la primera vez.
+- En Windows, Edge o Chrome para la ventana de la aplicacion.
+
+Se incluye Gradle Wrapper. La compilacion utiliza pnpm 11.9.0 mediante `npx`;
+no es necesario instalar Gradle ni pnpm globalmente.
+
+## Configuracion y ejecucion
+
+Seguir [la guia de configuracion](docs/CONFIGURACION.md). No usar la base real del
+negocio para probar esta copia.
+
+Una vez definidas las variables de entorno, desde la carpeta `backend`:
+
+```powershell
+.\gradlew.bat bootJar
+java -jar .\build\libs\LaFerreteriaReactBackend-0.0.1-SNAPSHOT.jar
 ```
 
-## Alcance de esta publicación
+Abrir <http://localhost:9092/app/>. El archivo JAR incluye React; no hace falta
+mantener otro servidor frontend para usar la aplicacion compilada.
 
-Esta copia está preparada para mostrar el código y la interfaz del proyecto. No incluye registros del negocio, copias de bases de datos, credenciales locales ni instaladores de uso interno. Se debe iniciar con una base propia y credenciales elegidas para ese entorno.
+Para desarrollo, ejecutar `.\gradlew.bat bootRun` desde `backend` y, en otra
+terminal dentro de `frontend`:
 
-La impresión directa de tickets depende de la configuración y los controladores de la impresora en Windows. Las copias de seguridad requieren las herramientas de PostgreSQL.
+```powershell
+npx.cmd --yes pnpm@11.9.0 install --frozen-lockfile
+npx.cmd --yes pnpm@11.9.0 dev
+```
 
----
+El frontend de desarrollo esta en <http://localhost:5173>. No iniciar dos copias
+al mismo tiempo en los mismos puertos.
 
-Proyecto de [Benjamin Lagos](https://github.com/benjapato).
+## Pruebas
+
+Desde `backend`:
+
+```powershell
+.\gradlew.bat test
+```
+
+Desde `frontend`:
+
+```powershell
+node --test src/utils/quantities.test.js
+npx.cmd --yes pnpm@11.9.0 lint
+```
+
+Las pruebas de Spring usan H2 en memoria y credenciales ficticias definidas en
+`src/test/resources`; esas credenciales no configuran la aplicacion normal.
+La prueba adicional de PostgreSQL se omite si `TEST_POSTGRES_URL` no esta
+definida. Ver las precauciones en la guia de configuracion.
+
+## Antes de publicar
+
+Consultar [PUBLICAR.md](docs/PUBLICAR.md). El `.gitignore` excluye archivos
+privados y generados, pero no sustituye la revision de lo que se va a subir.

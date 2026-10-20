@@ -112,7 +112,7 @@ class TicketPrintingTests {
     @Test void encabezadoIncluyeDomicilioContactoYNotaDePedido() {
         var text = new TicketLayout(sample(1)).lines(TicketLayout.CONTENT_WIDTH).stream()
                 .filter(line -> !line.rule()).map(TicketLayout.Line::text).toList();
-        assertEquals(List.of("LaFerreteria", "Comercio de demostracion", "Direccion de demostracion", "Contacto de demostracion"), text.subList(0, 4));
+        assertEquals(List.of("LaFerreteria", "Domicilio del comercio", "Localidad", "Tel.: configurar"), text.subList(0, 4));
         assertTrue(text.contains("NOTA DE PEDIDO"));
         assertFalse(text.contains("COMPROBANTE DE VENTA"));
     }

@@ -12,13 +12,13 @@ public class UsuarioInicializador
 
     private final UsuarioService usuarioService;
 
-    @Value("${app.usuario-inicial.nombre}")
+    @Value("${app.usuario-inicial.nombre:Administrador}")
     private String nombre;
 
-    @Value("${app.usuario-inicial.usuario}")
+    @Value("${app.usuario-inicial.usuario:admin}")
     private String nombreUsuario;
 
-    @Value("${app.usuario-inicial.contrasena}")
+    @Value("${app.usuario-inicial.contrasena:}")
     private String contrasena;
 
     public UsuarioInicializador(
